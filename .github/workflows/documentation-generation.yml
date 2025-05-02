@@ -1,0 +1,44 @@
+name: Documentation Generation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'  # Triggered when any docs-related files are modified
+      - '**/*.py'  # Also runs when code files are updated (to extract docstrings)
+  workflow_dispatch:
+
+jobs:
+  generate-docs:
+    name: Build and Deploy Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
+      - name: Set up Python Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install --upgrade pip
+          pip install mkdocs mkdocs-material
+
+      - name: Generate Documentation with MkDocs
+        run: |
+          mkdocs build  # Build the docs locally
+          
+      - name: Deploy Documentation to GitHub Pages
+        if: github.event_name == 'push'  # Only deploy on push event
+        run: |
+          mkdocs gh-deploy --force  # Deploy to GitHub Pages
+        env:
+          MKDOCS_DEPLOY: true
+          
+      - name: Upload Documentation Artifacts
+        if: github.event_name == 'workflow_dispatch'  # Only upload artifacts if manual trigger
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs
+          path: site/
