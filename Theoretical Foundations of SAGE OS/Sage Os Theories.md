@@ -15,7 +15,7 @@ This directory contains individual markdown files for each theoretical vision or
 * [`06_architectural_evolution.md`](./06_architectural_evolution.md) — Allowing AI to redesign not just code, but entire system architecture including instruction sets and device interaction models.
 * [`07_system_self_awareness.md`](./07_system_self_awareness.md) — Theoretical pursuit of system-level awareness and autonomous intent.
 * [`08_Model_Context_Protocol(MCP).md`](./08_Model_Context_Protocol(MCP).md) - to enable AI assistants to interface with external services, tools, and hardware .
-*[`09_AI-Driven OS for Evolving Hardware Adaptation and Self-Updating Capabilities.md`](./09_AI-Driven_OS_for_Evolving_Hardware Adaptation_and_Self-Updating_Capabilities.md) - implementing the idea of an AI-driven OS that can automatically detect hardware architecture, write, compile, and update drivers, and evolve itself by interacting with external sources.
+* [`09 Evolving_Hardware_Adaptation_and_Self_Updating_Capabilities.md`](./09_Evolving_Hardware_Adaptation_and_Self_Updating_Capabilities.md) - implementing the idea of an AI-driven OS that can automatically detect hardware architecture, write, compile, and update drivers, and evolve itself by interacting with external sources.
 ---
 
 Each file will contain:
