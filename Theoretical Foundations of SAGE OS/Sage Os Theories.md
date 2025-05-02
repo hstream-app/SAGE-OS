@@ -16,9 +16,12 @@ This directory contains individual markdown files for each theoretical vision or
 * [`07 System Self Awareness.md`](./07_system_self_awareness.md) — Theoretical pursuit of system-level awareness and autonomous intent.
 * [`08 Model Context Protocol(MCP).md`](./08_Model_Context_Protocol(MCP).md) - to enable AI assistants to interface with external services, tools, and hardware .
 * [`09 Evolving Hardware Adaptation And Self Updating Capabilities.md`](./09_Evolving_Hardware_Adaptation_and_Self_Updating_Capabilities.md) - implementing the idea of an AI-driven OS that can automatically detect hardware architecture, write, compile, and update drivers, and evolve itself by interacting with external sources.
+* [`10 Quantum & Supercomputing Compatibility`](./10_Hybrid_Quantum_Classical_Supercomputing_Integration_for_Autonomous_OS.md) - focusing on its integration with supercomputers and quantum computers, with AI/ML capabilities
+
+  
+Each file will contain:
 ---
 
-Each file will contain:
 
 * A clear theory name and description
 * Vision statement
