@@ -1,0 +1,46 @@
+name: Build SAGE OS Kernel
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [x86_64, arm64, aarch64, riscv64]
+        include:
+          - architecture: x86_64
+            toolchain: x86_64-linux-gnu
+          - architecture: arm64
+            toolchain: aarch64-linux-gnu
+          - architecture: aarch64
+            toolchain: aarch64-linux-gnu
+          - architecture: riscv64
+            toolchain: riscv64-linux-gnu
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc make qemu-system-${{ matrix.architecture }} binutils-${{ matrix.toolchain }} gcc-${{ matrix.toolchain }}
+
+      - name: Build Kernel
+        run: |
+          export ARCH=${{ matrix.architecture }}
+          export CROSS_COMPILE=${{ matrix.toolchain }}-
+          make clean
+          make all
+
+      - name: Upload Compiled Kernel
+        uses: actions/upload-artifact@v3
+        with:
+          name: sageos-${{ matrix.architecture }}-kernel
+          path: build/${{ matrix.architecture }}/kernel.img
