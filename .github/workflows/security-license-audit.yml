@@ -1,0 +1,52 @@
+name: Security & License Audit
+
+on:
+  schedule:
+    - cron: "0 4 * * 0"  # Every Sunday at 4 AM UTC
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.py'  # Triggered when any Python files are modified
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Perform Security and License Audits
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
+      - name: Set up Python Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install --upgrade pip
+          pip install safety license-checker
+
+      - name: Run Static Code Analysis (CppCheck)
+        run: |
+          sudo apt-get install -y cppcheck
+          cppcheck --enable=all src/
+
+      - name: Scan for Security Vulnerabilities
+        run: |
+          safety check --full-report
+
+      - name: License Compliance Check
+        run: |
+          license-checker --license BSD-3-Clause
+
+      - name: Scan for Binary Vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+
+      - name: Upload Security & License Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-license-report
+          path: reports/
