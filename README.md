@@ -3,9 +3,8 @@
 An experimental, bare-metal operating system designed from scratch to learn, adapt, and evolve — starting on Raspberry Pi.
 
 ---
-
-<details>
-  <summary>🔭 Vision</summary>
+ 
+  ## 🔭 Vision 
 
 **SAGE OS** is not just another operating system. It is a living, evolving system designed to:
 
@@ -16,7 +15,9 @@ An experimental, bare-metal operating system designed from scratch to learn, ada
 
 This is an experiment at the intersection of **kernel engineering**, **embedded systems**, and **machine intelligence** — pushing the boundaries of what an operating system can become.
 
-</details>
+<img src="https://github.com/user-attachments/assets/a5aeda94-147c-483f-8378-cca4ba023a13" width="600" height="500">
+
+ 
 
 <details>
   <summary>🎯 Objectives</summary>
