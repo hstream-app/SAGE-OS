@@ -1,0 +1,38 @@
+name: Build & Test SAGE OS on Multi-Architecture
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build for ${{ matrix.architecture }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [x86_64, arm64, aarch64, riscv64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc g++ make qemu-system
+
+      - name: Build kernel
+        run: |
+          make ARCH=${{ matrix.architecture }}
+
+      - name: Test kernel
+        run: ./scripts/test_emulated.sh ${{ matrix.architecture }}
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: sageos-${{ matrix.architecture }}
+          path: build/${{ matrix.architecture }}/
