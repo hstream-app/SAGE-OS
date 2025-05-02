@@ -1,0 +1,52 @@
+name: Quantum & GPU Regression Tests
+
+on:
+  push:
+    paths:
+      - 'quantum/**'  # Triggered when quantum-related files are modified
+      - 'cuda/**'      # Triggered when CUDA-related files are modified
+  workflow_dispatch:
+
+jobs:
+  quantum-gpu-test:
+    name: Run Quantum & GPU Regression Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip python3-dev
+          pip install --upgrade pip
+          pip install qiskit cirq torch torchvision tensorflow
+
+      - name: Test Quantum Algorithms with Qiskit
+        run: |
+          python3 quantum/test_qiskit.py
+
+      - name: Test Quantum Algorithms with Cirq
+        run: |
+          python3 quantum/test_cirq.py
+
+      - name: Install CUDA for GPU tests (x86_64 only)
+        if: runner.os == 'Linux' && matrix.architecture == 'x86_64'
+        run: |
+          sudo apt-get install -y nvidia-cuda-toolkit
+
+      - name: Run GPU Regression Tests
+        if: runner.os == 'Linux' && matrix.architecture == 'x86_64'
+        run: |
+          python3 cuda/test_gpu_load.py
+
+      - name: Report Results
+        run: |
+          python3 quantum/report_results.py
+          
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: quantum-gpu-results
+          path: results/
