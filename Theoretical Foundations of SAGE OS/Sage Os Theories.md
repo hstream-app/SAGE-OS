@@ -14,7 +14,7 @@ This directory contains individual markdown files for each theoretical vision or
 * [`05_energy_to_mass_conversion.md`](./05_energy_to_mass_conversion.md) — Speculative theory of AI involvement in physical transformations such as energy-to-matter conversion.
 * [`06_architectural_evolution.md`](./06_architectural_evolution.md) — Allowing AI to redesign not just code, but entire system architecture including instruction sets and device interaction models.
 * [`07_system_self_awareness.md`](./07_system_self_awareness.md) — Theoretical pursuit of system-level awareness and autonomous intent.
-
+* [`08_Model_Context_Protocol(MCP).md`](./08_Model_Context_Protocol(MCP).md) - to enable AI assistants to interface with external services, tools, and hardware:
 ---
 
 Each file will contain:
