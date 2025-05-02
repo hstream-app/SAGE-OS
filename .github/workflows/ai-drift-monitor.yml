@@ -1,0 +1,41 @@
+name: AI Drift Monitoring
+
+on:
+  push:
+    paths:
+      - 'ai/**' # Triggered when there are changes in the AI-related code
+  workflow_dispatch:
+
+jobs:
+  drift-check:
+    name: Check for AI Model Drift
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install --upgrade pip
+          pip install torch tensorflow scikit-learn
+
+      - name: Load Latest AI Models for Drift Detection
+        run: |
+          python3 ai/load_models.py --check-drift
+
+      - name: Run Drift Detection
+        run: |
+          python3 ai/check_drift.py --threshold 0.05  # 5% drift threshold
+
+      - name: Report Drift Status
+        run: |
+          python3 ai/report_drift.py --notify-team
+
+      - name: Upload Drift Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: ai-drift-report
+          path: reports/drift_status.txt
