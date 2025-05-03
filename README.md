@@ -17,8 +17,8 @@ This is an experiment at the intersection of **kernel engineering**, **embedded 
 
 <img src="https://github.com/user-attachments/assets/a5aeda94-147c-483f-8378-cca4ba023a13" width="600" height="500">
 
- 
 
+ 
 <details>
   <summary>🎯 Objectives</summary>
 
@@ -26,6 +26,49 @@ This is an experiment at the intersection of **kernel engineering**, **embedded 
 - Integrate basic AI/ML models to inform system-level decisions
 - Enable self-monitoring and self-optimization over time
 - Keep the codebase portable across architectures (starting with ARM/RPi)
+  
+<img src="https://github.com/user-attachments/assets/a726baa8-dca4-4097-ab31-54b8cd819287" width="600" height="700">
+
+  This image illustrates the **"Self-Evolving, AI-Driven OS Lifecycle"** — a conceptual flow for how your SAGE OS can autonomously detect hardware, build itself, and evolve across platforms.
+
+---
+
+### 🔍 Step-by-Step Breakdown:
+
+1. **AI Detects Architecture and Hardware**
+
+   * On boot or install, SAGE OS's embedded AI analyzes the CPU type, memory, buses, I/O interfaces, and connected devices.
+
+2. **Generate Platform-Specific Kernel and Drivers**
+
+   * Based on the detected architecture (ARM, x86, RISC-V, etc.), the AI compiles or adapts the kernel and drivers tailored to the platform.
+
+3. **Build Disk Image or Container**
+
+   * The AI assembles a bootable `.img`, `.iso`, or container that includes the new kernel, drivers, and shell environment.
+
+4. **Boot Automatically**
+
+   * The new OS version is booted directly, either on the device or inside a VM/emulator (like QEMU) for testing.
+
+5. **Monitor Performance and Stability**
+
+   * AI continuously checks system behavior: uptime, crashes, latency, driver responses, etc.
+
+6. **Stable → Keep New Image**
+
+   * If everything runs well, the system promotes this version as the active build.
+
+7. **Unstable → Roll Back**
+
+   * If issues are found, the AI automatically rolls back to the previous known-good state.
+
+ 
+---
+
+This workflow allows **SAGE OS to evolve, rebuild, and test itself across any platform** — moving toward true autonomy and architectural universality.
+ 
+
 
 </details>
 
