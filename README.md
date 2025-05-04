@@ -124,6 +124,7 @@ All rights reserved to the original author.
 </details>
 
 
+
 ```md
 ## 🧑‍💻 Contributing
 
@@ -137,5 +138,11 @@ SAGE OS is open to contributions from developers, researchers, and hardware hack
 By contributing, you agree to the above terms.
 ## License
 
-This project is licensed under the BSD 3-Clause License.  
+SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+
+You may use this project under the terms of the BSD 3-Clause License as stated in the LICENSE file.  
+Alternatively, commercial use with extended rights is available — contact the author for commercial licensing.
+
 See the [LICENSE](./LICENSE) file for details.
+
+
