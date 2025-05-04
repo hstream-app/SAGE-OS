@@ -190,5 +190,21 @@ SAGE OS is an ambitious open-source project to create a modular, intelligent, an
 
 ---
 
- 
+![CLA](https://img.shields.io/badge/Contributor_License_Agreement-Signed-green.svg)
 
+
+
+ ```md
+## 🧑‍💻 Contributing
+
+By contributing to this repository, you grant Ashish Yesale (the project maintainer) an irrevocable, worldwide, royalty-free license to use, modify, and sublicense your contribution under the terms of the SAGE OS open source licenses (BSD 3-Clause and CC BY-NC 4.0).
+
+You retain copyright on your original work.
+
+You confirm that:
+- Your contribution is your own work or you have permission to submit it.
+- You agree to the terms of the [AI Safety & Ethics Manifesto](./AI_Safety_And_Ethics.md).
+```
+
+"Contributors retain copyright to their original work.
+By submitting, you agree to our [Contributor License Agreement](./CLA.md) and open source licensing terms."
