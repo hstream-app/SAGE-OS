@@ -123,6 +123,18 @@ All rights reserved to the original author.
 
 </details>
 
+
+```md
+## 🧑‍💻 Contributing
+
+SAGE OS is open to contributions from developers, researchers, and hardware hackers.
+
+- 📜 [License (BSD 3-Clause)](./LICENSE)
+- ⚖️ [Commercial Use Terms](./COMMERCIAL_TERMS.md)
+- 🧠 [AI Safety & Ethics Manifesto](./AI_Safety_And_Ethics.md)
+- 🛠️ [How to Contribute](./CONTRIBUTING.md)
+
+By contributing, you agree to the above terms.
 ## License
 
 This project is licensed under the BSD 3-Clause License.  
