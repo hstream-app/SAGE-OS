@@ -1,5 +1,9 @@
 The theoretical framework, now explicitly contrasting two high-level approaches—one leveraging light virtualization and one avoiding it entirely—while still driven by the AI-directed translation pipeline.
 
+Refer Related topics :
+
+* [`AI-Based Binary Translation Model`](https://github.com/AshishYesale7/SAGE-OS/wiki/SAGE-OS-%E2%80%90-AI%E2%80%90Based-Binary-Translation-Model-Engine.md)
+
 ---
 
 # A Theoretical Framework for AI-Driven, Cross-Platform Binary Compatibility in a Self-Evolving OS
