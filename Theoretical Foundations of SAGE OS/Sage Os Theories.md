@@ -18,6 +18,8 @@ This directory contains individual markdown files for each theoretical vision or
 * * [`09 Evolving Hardware Adaptation And Self Updating Capabilities.md`](./09_Evolving_Hardware_Adaptation_and_Self_Updating_Capabilities.md) - implementing the idea of an AI-driven OS that can automatically detect hardware architecture, write, compile, and update drivers, and evolve itself by interacting with external sources.
 * * [`10 Quantum & Supercomputing Compatibility`](./10_Hybrid_Quantum_Classical_Supercomputing_Integration_for_Autonomous_OS.md) - focusing on its integration with supercomputers and quantum computers, with AI/ML capabilities
 * * [`11_AI-Driven, Cross-Platform Binary Compatibility in a Self-Evolving OS`](./11_Framework_for_AI_Driven_Native_Speed_Cross_Platform_Binary_Compatibility.md) - the theoretical framework, now explicitly contrasting two high-level approaches—one leveraging light virtualization and one avoiding it entirely—while still driven by the AI-directed translation pipeline.
+
+* * [`12_Absolute Zero: Reinforced Self-play Reasoning with Zero Data`](./12_Absolute_Zero:Reinforced_Self-play_Reasoning_with_Zero_Data.md) : "Absolute Zero: Reinforced Self-play Reasoning with Zero Data"—is highly relevant to our goals for SAGE OS. It introduces a novel approach where AI models learn reasoning skills without any external data, relying solely on self-generated tasks and verifiable rewards.
   
 Each file will contain:
 ---
