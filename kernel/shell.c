@@ -1,0 +1,228 @@
+#include "shell.h"
+#include "uart.h"
+#include "memory.h"
+#include "types.h"
+
+#define MAX_COMMAND_LENGTH 256
+#define MAX_ARGS 16
+
+// Shell prompt
+static const char* PROMPT = "sage> ";
+
+// Command history
+#define HISTORY_SIZE 10
+static char history[HISTORY_SIZE][MAX_COMMAND_LENGTH];
+static int history_count = 0;
+static int history_index = 0;
+
+// Built-in commands
+typedef void (*command_func_t)(int argc, char* argv[]);
+
+typedef struct {
+    const char* name;
+    const char* description;
+    command_func_t func;
+} command_t;
+
+// Forward declarations of command functions
+static void cmd_help(int argc, char* argv[]);
+static void cmd_echo(int argc, char* argv[]);
+static void cmd_clear(int argc, char* argv[]);
+static void cmd_meminfo(int argc, char* argv[]);
+static void cmd_reboot(int argc, char* argv[]);
+static void cmd_version(int argc, char* argv[]);
+
+// Command table
+static const command_t commands[] = {
+    {"help",    "Display help information",           cmd_help},
+    {"echo",    "Echo arguments to the console",      cmd_echo},
+    {"clear",   "Clear the screen",                   cmd_clear},
+    {"meminfo", "Display memory information",         cmd_meminfo},
+    {"reboot",  "Reboot the system",                  cmd_reboot},
+    {"version", "Display OS version information",     cmd_version},
+    {NULL, NULL, NULL}  // Terminator
+};
+
+// Initialize the shell
+void shell_init() {
+    uart_puts("SAGE OS Shell initialized\n");
+}
+
+// Split a command into arguments
+static int split_args(char* command, char* argv[], int max_args) {
+    int argc = 0;
+    char* token = command;
+    char* end = command + strlen(command);
+    
+    // Skip leading whitespace
+    while (*token && (*token == ' ' || *token == '\t')) {
+        token++;
+    }
+    
+    while (token < end && argc < max_args) {
+        // Mark the start of the argument
+        argv[argc++] = token;
+        
+        // Find the end of the argument
+        while (*token && *token != ' ' && *token != '\t') {
+            token++;
+        }
+        
+        // Null-terminate the argument
+        if (*token) {
+            *token++ = '\0';
+        }
+        
+        // Skip whitespace to the next argument
+        while (*token && (*token == ' ' || *token == '\t')) {
+            token++;
+        }
+    }
+    
+    return argc;
+}
+
+// Add a command to history
+static void add_to_history(const char* command) {
+    if (strlen(command) == 0) {
+        return;  // Don't add empty commands to history
+    }
+    
+    // Check if this command is the same as the last one
+    if (history_count > 0 && strcmp(command, history[(history_index - 1) % HISTORY_SIZE]) == 0) {
+        return;  // Don't add duplicate commands consecutively
+    }
+    
+    strcpy(history[history_index], command);
+    history_index = (history_index + 1) % HISTORY_SIZE;
+    if (history_count < HISTORY_SIZE) {
+        history_count++;
+    }
+}
+
+// Process a command
+void shell_process_command(const char* command) {
+    char cmd_copy[MAX_COMMAND_LENGTH];
+    strncpy(cmd_copy, command, MAX_COMMAND_LENGTH - 1);
+    cmd_copy[MAX_COMMAND_LENGTH - 1] = '\0';
+    
+    // Add to history
+    add_to_history(cmd_copy);
+    
+    // Split into arguments
+    char* argv[MAX_ARGS];
+    int argc = split_args(cmd_copy, argv, MAX_ARGS);
+    
+    if (argc == 0) {
+        return;  // Empty command
+    }
+    
+    // Find and execute the command
+    for (int i = 0; commands[i].name != NULL; i++) {
+        if (strcmp(argv[0], commands[i].name) == 0) {
+            commands[i].func(argc, argv);
+            return;
+        }
+    }
+    
+    // Command not found
+    uart_printf("Unknown command: %s\n", argv[0]);
+    uart_puts("Type 'help' for a list of commands\n");
+}
+
+// Run the shell (main loop)
+void shell_run() {
+    char command[MAX_COMMAND_LENGTH];
+    int pos = 0;
+    
+    while (1) {
+        // Display prompt
+        uart_puts(PROMPT);
+        
+        // Reset command buffer
+        memset(command, 0, MAX_COMMAND_LENGTH);
+        pos = 0;
+        
+        // Read command
+        while (1) {
+            char c = uart_getc();
+            
+            if (c == '\r' || c == '\n') {
+                // End of command
+                uart_puts("\n");
+                break;
+            } else if (c == 8 || c == 127) {
+                // Backspace
+                if (pos > 0) {
+                    pos--;
+                    uart_puts("\b \b");  // Erase character
+                }
+            } else if (c >= ' ' && c <= '~' && pos < MAX_COMMAND_LENGTH - 1) {
+                // Printable character
+                command[pos++] = c;
+                uart_putc(c);  // Echo
+            }
+        }
+        
+        command[pos] = '\0';  // Null-terminate
+        
+        // Process the command
+        shell_process_command(command);
+    }
+}
+
+// Command implementations
+
+static void cmd_help(int argc, char* argv[]) {
+    uart_puts("Available commands:\n");
+    
+    for (int i = 0; commands[i].name != NULL; i++) {
+        uart_printf("  %-10s - %s\n", commands[i].name, commands[i].description);
+    }
+}
+
+static void cmd_echo(int argc, char* argv[]) {
+    for (int i = 1; i < argc; i++) {
+        uart_puts(argv[i]);
+        if (i < argc - 1) {
+            uart_putc(' ');
+        }
+    }
+    uart_putc('\n');
+}
+
+static void cmd_clear(int argc, char* argv[]) {
+    // Clear screen (ANSI escape sequence)
+    uart_puts("\033[2J\033[H");
+}
+
+static void cmd_meminfo(int argc, char* argv[]) {
+    memory_stats();
+}
+
+static void cmd_reboot(int argc, char* argv[]) {
+    uart_puts("Rebooting...\n");
+    
+    // Reset the system using the PM (Power Management) registers
+    // This is specific to Raspberry Pi
+    volatile uint32_t* PM_RSTC = (uint32_t*)0x3F10001C;
+    volatile uint32_t* PM_WDOG = (uint32_t*)0x3F100024;
+    
+    // PM password
+    const uint32_t PM_PASSWORD = 0x5A000000;
+    const uint32_t PM_RSTC_WRCFG_FULL_RESET = 0x00000020;
+    
+    // Set watchdog timer
+    *PM_WDOG = PM_PASSWORD | 1;
+    *PM_RSTC = PM_PASSWORD | PM_RSTC_WRCFG_FULL_RESET;
+    
+    while (1) {
+        // Wait for reset
+    }
+}
+
+static void cmd_version(int argc, char* argv[]) {
+    uart_puts("SAGE OS v0.1.0\n");
+    uart_puts("Self-Aware General Environment Operating System\n");
+    uart_puts("Copyright (c) 2025 SAGE OS Team\n");
+}

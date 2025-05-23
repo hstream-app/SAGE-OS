@@ -1,0 +1,29 @@
+# SAGE OS Raspberry Pi Configuration
+# This file should be placed in the boot partition of the SD card
+
+# Enable 64-bit mode
+arm_64bit=1
+
+# Set the kernel filename
+kernel=kernel8.img
+
+# Disable rainbow splash screen
+disable_splash=1
+
+# Set GPU memory to minimum (16MB)
+gpu_mem=16
+
+# Disable overscan
+disable_overscan=1
+
+# Set UART clock rate
+init_uart_clock=48000000
+
+# Enable UART for console
+enable_uart=1
+
+# Set CPU clock speed (optional, default is 1500MHz for Pi 4)
+# arm_freq=1500
+
+# Disable HDMI (optional, if running headless)
+# hdmi_blanking=2

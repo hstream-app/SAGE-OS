@@ -79,32 +79,50 @@ This workflow allows **SAGE OS to evolve, rebuild, and test itself across any pl
 
 - [x] Custom bootloader for Raspberry Pi
 - [x] Basic kernel with memory & process management
-- [ ] Custom command-line shell (SAGE Shell)
-- [ ] Integrated AI agent (TinyML / rule-based to start)
-- [ ] Self-tuning task scheduler and memory allocator
+- [x] Custom command-line shell (SAGE Shell)
+- [x] Memory management system
+- [x] UART driver for console I/O
+- [x] Raspberry Pi 5 support
+- [x] AI HAT+ driver for neural processing
+- [x] Rust-based core components
+- [x] Cryptography module for secure operations
+- [ ] Self-tuning task scheduler
 - [ ] Support for minimal file system
 - [ ] Ability to evolve through version-aware updates
+- [ ] Full AI model loading and inference pipeline
 
 </details>
 
 <details>
   <summary>🧠 AI & Machine Learning Integration</summary>
 
-SAGE OS will include embedded, resource-efficient AI components that can:
-- Perform local inference (TinyML)
+SAGE OS includes embedded, resource-efficient AI components that can:
+- Perform local inference using the AI HAT+ with up to 26 TOPS
+- Support multiple model formats and precisions (FP32, FP16, INT8, INT4)
 - Observe usage and optimize scheduling
 - Trigger self-diagnostics and reconfiguration
+- Dynamically adjust power consumption based on workload
+- Monitor system health and performance
 - Eventually, enable modular regeneration of subsystems
+
+The AI HAT+ provides hardware acceleration for neural networks with:
+- Up to 26 TOPS of neural processing power
+- 4GB of dedicated memory for AI models
+- Support for various model types (classification, detection, segmentation, generation)
+- Power-efficient operation with multiple power modes
+- Temperature monitoring and thermal management
+- High-speed data transfer using SPI and control via I2C
 
 </details>
 
 <details>
   <summary>🧰 Tech Stack</summary>
 
-- **Languages**: ARM Assembly, C (kernel), Python (tools & ML prototyping)
-- **Platform**: Raspberry Pi 4B (64-bit ARMv8)
-- **Toolchain**: `arm-none-eabi-gcc`, `QEMU`, `Make`, TinyML (TFLM, uTensor)
-- **Build Environment**: macOS M1 (cross-compilation)
+- **Languages**: ARM Assembly, C (kernel), Rust (core components), Python (tools & ML prototyping)
+- **Platform**: Raspberry Pi 4B/5 (64-bit ARMv8/ARMv9)
+- **Toolchain**: `aarch64-linux-gnu-gcc`, `rustc`, `QEMU`, `CMake`, TinyML (TFLM, uTensor)
+- **Build Environment**: Cross-compilation (Linux, macOS)
+- **AI Acceleration**: AI HAT+ with up to 26 TOPS neural processing
 
 </details>
 
@@ -118,9 +136,120 @@ All rights reserved to the original author.
 </details>
 
 <details>
-  <summary>📦 Folder Structure (Coming Soon)</summary>
-  <!-- You can add the folder structure here later -->
+  <summary>📦 Folder Structure</summary>
 
+```
+SAGE-OS/
+├── boot/                  # Boot code
+│   └── boot.S             # ARM64 boot assembly
+├── kernel/                # Kernel components
+│   ├── core/              # Core kernel functionality
+│   │   ├── main.rs        # Rust kernel entry point
+│   │   ├── init.c         # C initialization code
+│   │   ├── shell.rs       # Interactive shell
+│   │   └── ai_subsystem.rs # AI subsystem interface
+│   ├── hal/               # Hardware abstraction layer
+│   │   ├── rpi4.h         # Raspberry Pi 4 hardware definitions
+│   │   └── rpi5.h         # Raspberry Pi 5 hardware definitions
+│   ├── drivers/           # Hardware drivers
+│   │   ├── uart.c         # UART driver
+│   │   ├── gpio.c         # GPIO driver
+│   │   ├── timer.c        # Timer driver
+│   │   ├── ai_hat.c       # AI HAT+ driver
+│   │   └── ai_hat.h       # AI HAT+ interface
+│   ├── memory/            # Memory management
+│   │   ├── allocator.rs   # Memory allocator
+│   │   └── mmu.c          # Memory Management Unit
+│   └── fs/                # File system
+│       └── vfs.rs         # Virtual File System
+├── security/              # Security components
+│   ├── crypto.c           # Cryptography implementation
+│   └── crypto.h           # Cryptography interface
+├── config.txt             # Raspberry Pi 3/4 configuration
+├── config_rpi5.txt        # Raspberry Pi 5 configuration
+├── linker.ld              # Linker script
+├── Makefile               # Build system
+├── CMakeLists.txt         # CMake build configuration
+├── run_qemu.sh            # QEMU runner script
+├── BUILD.md               # Build instructions
+└── README.md              # This file
+```
+
+</details>
+
+<details>
+  <summary>🚀 Getting Started</summary>
+
+### Prerequisites
+
+- Raspberry Pi 3, 4, or 5
+- SD card
+- USB-to-TTL serial cable
+- Cross-compilation toolchain (aarch64-linux-gnu-gcc)
+- Rust toolchain (for core components)
+- Optional: AI HAT+ for neural processing acceleration
+
+### Building
+
+See [BUILD.md](BUILD.md) for detailed build instructions.
+
+Quick start:
+
+```bash
+# Install dependencies
+sudo apt-get install gcc-aarch64-linux-gnu cmake
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup target add aarch64-unknown-none
+
+# Clone the repository
+git clone https://github.com/yourusername/SAGE-OS.git
+cd SAGE-OS
+
+# Build for Raspberry Pi 4
+make
+
+# Build for Raspberry Pi 5
+make rpi5
+
+# Build for Raspberry Pi 5 with AI HAT+ support
+make rpi5_ai
+```
+
+### Running
+
+1. Copy `kernel8.img` and the appropriate config file to an SD card:
+   - For Raspberry Pi 3/4: Use `config.txt`
+   - For Raspberry Pi 5: Use `config_rpi5.txt` (rename to `config.txt` on the SD card)
+2. Insert the SD card into your Raspberry Pi
+3. Connect a serial console
+4. Power on the Raspberry Pi
+
+### Testing with QEMU
+
+You can test SAGE OS without physical hardware using QEMU:
+
+```bash
+# For Raspberry Pi 3/4
+./run_qemu.sh
+
+# For Raspberry Pi 5
+./run_qemu.sh -p rpi5
+```
+
+### Shell Commands
+
+Once booted, SAGE OS provides a shell with the following commands:
+
+- `help` - Display available commands
+- `echo [text]` - Echo text to the console
+- `clear` - Clear the screen
+- `meminfo` - Display memory information
+- `reboot` - Reboot the system
+- `version` - Display OS version information
+- `ai info` - Display AI subsystem information (if enabled)
+- `ai temp` - Show AI HAT+ temperature (if available)
+- `ai power` - Show AI HAT+ power consumption (if available)
+- `ai models` - List loaded AI models (if any)
 
 </details>
 
