@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi qemu-system-arm
+          sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu qemu-system-aarch64
       
       - name: Build kernel
         run: |
@@ -33,7 +33,11 @@ jobs:
       
       - name: Test with QEMU (if possible)
         run: |
+          # Make sure run_qemu.sh is executable
+          chmod +x run_qemu.sh
+          
           # Try to run QEMU for a short time to see if it boots
           # This is a basic test to see if the kernel can be loaded by QEMU
+          # We use || true because QEMU might exit with non-zero status when terminated
           timeout 10s ./run_qemu.sh || true
           echo "QEMU test completed"
