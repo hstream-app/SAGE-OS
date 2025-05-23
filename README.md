@@ -1,12 +1,11 @@
-
 # SAGE OS 🌱🧠
+
 **Self-Aware General Environment**  
 An experimental, bare-metal operating system designed from scratch to learn, adapt, and evolve — starting on Raspberry Pi.
 
 ![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)
----
- 
-  ## 🔭 Vision 
+
+## 🔭 Vision 
 
 **SAGE OS** is not just another operating system. It is a living, evolving system designed to:
 
@@ -17,84 +16,17 @@ An experimental, bare-metal operating system designed from scratch to learn, ada
 
 This is an experiment at the intersection of **kernel engineering**, **embedded systems**, and **machine intelligence** — pushing the boundaries of what an operating system can become.
 
-<img src="https://github.com/user-attachments/assets/a5aeda94-147c-483f-8378-cca4ba023a13" width="600" height="500">
+## 🚀 Features
 
+- **Custom Bootloader**: Designed specifically for Raspberry Pi hardware
+- **Bare-Metal Kernel**: Written in C and ARM assembly for maximum performance
+- **AI Subsystem**: Integrated AI capabilities with the AI HAT+ accelerator
+- **Memory Management**: Efficient memory allocation and management
+- **Shell Interface**: Interactive command-line interface
+- **Hardware Abstraction**: Support for Raspberry Pi 3, 4, and 5
+- **Device Drivers**: UART, GPIO, I2C, SPI, and AI HAT+ drivers
 
- 
-<details>
-  <summary>🎯 Objectives</summary>
-
-- Build a fully bootable, bare-metal operating system from scratch
-- Integrate basic AI/ML models to inform system-level decisions
-- Enable self-monitoring and self-optimization over time
-- Keep the codebase portable across architectures (starting with ARM/RPi)
-  
-<img src="https://github.com/user-attachments/assets/a726baa8-dca4-4097-ab31-54b8cd819287" width="600" height="700">
-
-  This image illustrates the **"Self-Evolving, AI-Driven OS Lifecycle"** — a conceptual flow for how your SAGE OS can autonomously detect hardware, build itself, and evolve across platforms.
-
----
-
-### 🔍 Step-by-Step Breakdown:
-
-1. **AI Detects Architecture and Hardware**
-
-   * On boot or install, SAGE OS's embedded AI analyzes the CPU type, memory, buses, I/O interfaces, and connected devices.
-
-2. **Generate Platform-Specific Kernel and Drivers**
-
-   * Based on the detected architecture (ARM, x86, RISC-V, etc.), the AI compiles or adapts the kernel and drivers tailored to the platform.
-
-3. **Build Disk Image or Container**
-
-   * The AI assembles a bootable `.img`, `.iso`, or container that includes the new kernel, drivers, and shell environment.
-
-4. **Boot Automatically**
-
-   * The new OS version is booted directly, either on the device or inside a VM/emulator (like QEMU) for testing.
-
-5. **Monitor Performance and Stability**
-
-   * AI continuously checks system behavior: uptime, crashes, latency, driver responses, etc.
-
-6. **Stable → Keep New Image**
-
-   * If everything runs well, the system promotes this version as the active build.
-
-7. **Unstable → Roll Back**
-
-   * If issues are found, the AI automatically rolls back to the previous known-good state.
-
- 
----
-
-This workflow allows **SAGE OS to evolve, rebuild, and test itself across any platform** — moving toward true autonomy and architectural universality.
- 
-
-
-</details>
-
-<details>
-  <summary>⚙️ Functional Goals</summary>
-
-- [x] Custom bootloader for Raspberry Pi
-- [x] Basic kernel with memory & process management
-- [x] Custom command-line shell (SAGE Shell)
-- [x] Memory management system
-- [x] UART driver for console I/O
-- [x] Raspberry Pi 5 support
-- [x] AI HAT+ driver for neural processing
-- [x] Rust-based core components
-- [x] Cryptography module for secure operations
-- [ ] Self-tuning task scheduler
-- [ ] Support for minimal file system
-- [ ] Ability to evolve through version-aware updates
-- [ ] Full AI model loading and inference pipeline
-
-</details>
-
-<details>
-  <summary>🧠 AI & Machine Learning Integration</summary>
+## 🧠 AI & Machine Learning Integration
 
 SAGE OS includes embedded, resource-efficient AI components that can:
 - Perform local inference using the AI HAT+ with up to 26 TOPS
@@ -113,10 +45,7 @@ The AI HAT+ provides hardware acceleration for neural networks with:
 - Temperature monitoring and thermal management
 - High-speed data transfer using SPI and control via I2C
 
-</details>
-
-<details>
-  <summary>🧰 Tech Stack</summary>
+## 🧰 Tech Stack
 
 - **Languages**: ARM Assembly, C (kernel), Rust (core components), Python (tools & ML prototyping)
 - **Platform**: Raspberry Pi 4B/5 (64-bit ARMv8/ARMv9)
@@ -124,61 +53,34 @@ The AI HAT+ provides hardware acceleration for neural networks with:
 - **Build Environment**: Cross-compilation (Linux, macOS)
 - **AI Acceleration**: AI HAT+ with up to 26 TOPS neural processing
 
-</details>
-
-<details>
-  <summary>🔐 License</summary>
-
-This project is licensed under the [CC BY-NC 4.0 License](https://creativecommons.org/licenses/by-nc/4.0/).  
-You're free to use, modify, and share the code for non-commercial purposes with attribution.  
-All rights reserved to the original author.
-
-</details>
-
-<details>
-  <summary>📦 Folder Structure</summary>
+## 📦 Project Structure
 
 ```
 SAGE-OS/
 ├── boot/                  # Boot code
 │   └── boot.S             # ARM64 boot assembly
 ├── kernel/                # Kernel components
-│   ├── core/              # Core kernel functionality
-│   │   ├── main.rs        # Rust kernel entry point
-│   │   ├── init.c         # C initialization code
-│   │   ├── shell.rs       # Interactive shell
-│   │   └── ai_subsystem.rs # AI subsystem interface
-│   ├── hal/               # Hardware abstraction layer
-│   │   ├── rpi4.h         # Raspberry Pi 4 hardware definitions
-│   │   └── rpi5.h         # Raspberry Pi 5 hardware definitions
-│   ├── drivers/           # Hardware drivers
-│   │   ├── uart.c         # UART driver
-│   │   ├── gpio.c         # GPIO driver
-│   │   ├── timer.c        # Timer driver
-│   │   ├── ai_hat.c       # AI HAT+ driver
-│   │   └── ai_hat.h       # AI HAT+ interface
-│   ├── memory/            # Memory management
-│   │   ├── allocator.rs   # Memory allocator
-│   │   └── mmu.c          # Memory Management Unit
-│   └── fs/                # File system
-│       └── vfs.rs         # Virtual File System
-├── security/              # Security components
-│   ├── crypto.c           # Cryptography implementation
-│   └── crypto.h           # Cryptography interface
+│   ├── kernel.c           # Kernel main entry point
+│   ├── memory.c           # Memory management
+│   ├── shell.c            # Interactive shell
+│   ├── stdio.c            # Standard I/O functions
+│   └── ai/                # AI subsystem
+│       └── ai_subsystem.c # AI subsystem implementation
+├── drivers/               # Hardware drivers
+│   ├── uart.c             # UART driver
+│   ├── i2c.c              # I2C driver
+│   ├── spi.c              # SPI driver
+│   └── ai_hat/            # AI HAT+ driver
+│       ├── ai_hat.c       # AI HAT+ implementation
+│       └── ai_hat.h       # AI HAT+ interface
 ├── config.txt             # Raspberry Pi 3/4 configuration
 ├── config_rpi5.txt        # Raspberry Pi 5 configuration
 ├── linker.ld              # Linker script
 ├── Makefile               # Build system
-├── CMakeLists.txt         # CMake build configuration
-├── run_qemu.sh            # QEMU runner script
-├── BUILD.md               # Build instructions
-└── README.md              # This file
+└── run_qemu.sh            # QEMU runner script
 ```
 
-</details>
-
-<details>
-  <summary>🚀 Getting Started</summary>
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -202,7 +104,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustup target add aarch64-unknown-none
 
 # Clone the repository
-git clone https://github.com/yourusername/SAGE-OS.git
+git clone https://github.com/AshishYesale7/SAGE-OS.git
 cd SAGE-OS
 
 # Build for Raspberry Pi 4
@@ -251,11 +153,6 @@ Once booted, SAGE OS provides a shell with the following commands:
 - `ai power` - Show AI HAT+ power consumption (if available)
 - `ai models` - List loaded AI models (if any)
 
-</details>
-
-
-
-```md
 ## 🧑‍💻 Contributing
 
 SAGE OS is open to contributions from developers, researchers, and hardware hackers.
@@ -266,7 +163,22 @@ SAGE OS is open to contributions from developers, researchers, and hardware hack
 - 🛠️ [How to Contribute](./CONTRIBUTING.md)
 
 By contributing, you agree to the above terms.
-## License
+
+## 🔍 Current Development Status
+
+- [x] Custom bootloader for Raspberry Pi
+- [x] Basic kernel with memory & process management
+- [x] Custom command-line shell (SAGE Shell)
+- [x] Memory management system
+- [x] UART driver for console I/O
+- [x] Raspberry Pi 5 support
+- [x] AI HAT+ driver for neural processing
+- [ ] Self-tuning task scheduler
+- [ ] Support for minimal file system
+- [ ] Ability to evolve through version-aware updates
+- [ ] Full AI model loading and inference pipeline
+
+## 📝 License
 
 SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
 
@@ -274,5 +186,3 @@ You may use this project under the terms of the BSD 3-Clause License as stated i
 Alternatively, commercial use with extended rights is available — contact the author for commercial licensing.
 
 See the [LICENSE](./LICENSE) file for details.
-
-
