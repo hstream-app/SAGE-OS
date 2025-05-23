@@ -1,0 +1,6 @@
+# Raspberry Pi 3/4 configuration
+arm_64bit=1
+kernel=kernel8.img
+enable_uart=1
+uart_2ndstage=1
+dtoverlay=disable-bt
