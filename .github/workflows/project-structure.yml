@@ -1,0 +1,60 @@
+name: Project Structure Validation
+
+on:
+  push:
+    branches: [ main, origin, rpi5-os-implementation ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+      
+      - name: Validate directory structure
+        run: |
+          # Check for required directories
+          for dir in boot kernel drivers docs tests; do
+            if [ ! -d "$dir" ]; then
+              echo "Error: Required directory '$dir' is missing"
+              exit 1
+            fi
+          done
+          echo "✅ All required directories exist"
+          
+          # Check for essential files
+          essential_files=(
+            "boot/boot.S"
+            "linker.ld"
+            "Makefile"
+            "README.md"
+            "LICENSE"
+          )
+          
+          for file in "${essential_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Error: Essential file '$file' is missing"
+              exit 1
+            fi
+          done
+          echo "✅ All essential files exist"
+          
+          # Check for build artifacts
+          if [ ! -f "kernel.elf" ] && [ ! -f "kernel8.img" ]; then
+            echo "Warning: No build artifacts found. Run 'make' to build the project."
+          else
+            echo "✅ Build artifacts exist"
+          fi
+          
+          echo "Project structure validation passed!"
