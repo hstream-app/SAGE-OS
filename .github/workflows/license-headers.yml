@@ -1,0 +1,47 @@
+name: License Headers
+
+on:
+  push:
+    branches: [ main, origin, rpi5-os-implementation ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  add-license-headers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+      
+      - name: Check for missing license headers
+        id: check-headers
+        run: |
+          python add_license_headers.py --check-only
+          if [ $? -ne 0 ]; then
+            echo "Missing license headers detected"
+            echo "missing_headers=true" >> $GITHUB_OUTPUT
+          else
+            echo "All files have license headers"
+            echo "missing_headers=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Add license headers if missing
+        if: steps.check-headers.outputs.missing_headers == 'true'
+        run: |
+          python add_license_headers.py
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add .
+          git commit -m "Add missing license headers [automated]"
+          git push

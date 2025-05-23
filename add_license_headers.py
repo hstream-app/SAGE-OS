@@ -214,14 +214,41 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add license headers to source files')
     parser.add_argument('--dir', '-d', default='.', help='Directory to process')
     parser.add_argument('--recursive', '-r', action='store_true', help='Process directories recursively')
+    parser.add_argument('--check-only', action='store_true', help='Only check for missing headers, do not modify files')
     
     args = parser.parse_args()
     
-    modified_files = process_files(args.dir, args.recursive)
-    
-    print(f"Added license headers to {len(modified_files)} files")
-    
-    if modified_files:
-        print("\nModified files:")
-        for file in modified_files:
-            print(f"  - {file}")
+    if args.check_only:
+        # Check mode - just identify files that need headers
+        missing_headers = []
+        repo_root = os.path.abspath(args.dir)
+        
+        for root, dirs, files in os.walk(repo_root):
+            # Skip excluded directories
+            dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS and not d.startswith('.')]
+            
+            for file in files:
+                file_path = os.path.join(root, file)
+                comment_style = should_process_file(file_path, repo_root)
+                
+                if comment_style:
+                    missing_headers.append(os.path.relpath(file_path, repo_root))
+        
+        if missing_headers:
+            print(f"Found {len(missing_headers)} files missing license headers:")
+            for file in missing_headers:
+                print(f"  - {file}")
+            sys.exit(1)
+        else:
+            print("All files have license headers")
+            sys.exit(0)
+    else:
+        # Normal mode - add headers
+        modified_files = process_files(args.dir, args.recursive)
+        
+        print(f"Added license headers to {len(modified_files)} files")
+        
+        if modified_files:
+            print("\nModified files:")
+            for file in modified_files:
+                print(f"  - {file}")
