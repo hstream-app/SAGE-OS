@@ -57,3 +57,29 @@ jobs:
           if [ "$ERROR_COUNT" -gt 0 ]; then
             exit 1
           fi
+          
+      - name: Check for missing includes
+        run: |
+          find . -name "*.c" -o -name "*.h" | xargs grep -l "#include" | while read file; do
+            echo "Checking $file for missing includes..."
+            gcc -fsyntax-only -Wall -Wextra -I. -I./kernel -I./drivers $file || true
+          done
+
+      - name: Check for preprocessor directive errors
+        run: |
+          find . -name "*.h" | while read file; do
+            echo "Checking $file for preprocessor directive errors..."
+            if grep -q "#ifndef" "$file" && ! grep -q "#endif" "$file"; then
+              echo "Error: Missing #endif in $file"
+              exit 1
+            fi
+          done
+
+      - name: Check for integer overflow
+        run: |
+          find . -name "*.c" | xargs grep -l "malloc" | while read file; do
+            echo "Checking $file for integer overflow in memory allocation..."
+            if grep -q "malloc.*\*" "$file"; then
+              echo "Warning: Potential integer overflow in malloc in $file"
+            fi
+          done
