@@ -209,7 +209,7 @@ ai_hat_status_t ai_hat_init(void) {
     // Initialize AI HAT+ information
     ai_hat_info.version = (version[0] << 8) | version[1];
     ai_hat_info.max_tops = 26; // 26 TOPS for AI HAT+
-    ai_hat_info.memory_size = 4 * 1024 * 1024 * 1024; // 4GB
+    ai_hat_info.memory_size = 4ULL * 1024 * 1024 * 1024; // 4GB
     ai_hat_info.power_mode = AI_HAT_POWER_MEDIUM;
     
     // Read initial temperature and power consumption
