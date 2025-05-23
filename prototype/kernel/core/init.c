@@ -67,7 +67,8 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────#include <stdint.h>
+// ─────────────────────────────────────────────────────────────────────────────
+#include <stdint.h>
 #include <stddef.h>
 
 // External functions
