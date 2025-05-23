@@ -118,9 +118,124 @@ All rights reserved to the original author.
 </details>
 
 <details>
-  <summary>📦 Folder Structure (Coming Soon)</summary>
-  <!-- You can add the folder structure here later -->
+  <summary>📦 Folder Structure</summary>
+  
+- `boot/` - Architecture-specific boot code
+- `kernel/` - Core kernel functionality
+- `drivers/` - Hardware drivers
+- `scripts/` - Utility scripts for building and testing
 
+</details>
+
+<details>
+  <summary>🚀 Building and Running SAGE OS</summary>
+
+## Prerequisites
+
+To build and run SAGE OS, you need the following tools:
+
+- GCC cross-compilers for your target architectures:
+  - `x86_64-linux-gnu-gcc` for x86_64
+  - `aarch64-linux-gnu-gcc` for ARM64/AArch64
+  - `riscv64-linux-gnu-gcc` for RISC-V 64-bit
+
+- QEMU for emulation:
+  - `qemu-system-x86_64` for x86_64
+  - `qemu-system-aarch64` for ARM64/AArch64
+  - `qemu-system-riscv64` for RISC-V 64-bit
+
+### Installing Prerequisites
+
+On Debian/Ubuntu:
+
+```bash
+# Install cross-compilers
+sudo apt-get install gcc-x86-64-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
+
+# Install QEMU
+sudo apt-get install qemu-system-x86 qemu-system-arm qemu-system-misc
+```
+
+## Building SAGE OS
+
+To build SAGE OS for a specific architecture:
+
+```bash
+# Clean previous build artifacts
+make clean
+
+# Build for x86_64
+make ARCH=x86_64
+
+# Build for ARM64/AArch64
+make ARCH=aarch64
+
+# Build for RISC-V 64-bit
+make ARCH=riscv64
+```
+
+The build process creates:
+- Object files for each source file
+- `kernel.elf` - The linked ELF executable
+- `kernel8.img` - The raw binary image
+
+## Running SAGE OS
+
+### Using QEMU
+
+You can run SAGE OS in QEMU using the provided script:
+
+```bash
+# Run on x86_64
+./scripts/test_emulated.sh x86_64
+
+# Run on ARM64/AArch64
+./scripts/test_emulated.sh aarch64
+
+# Run on RISC-V 64-bit
+./scripts/test_emulated.sh riscv64
+```
+
+### Running on Real Hardware
+
+For Raspberry Pi (ARM64):
+1. Copy `kernel8.img` to the boot partition of your SD card
+2. Make sure `config.txt` contains `arm_64bit=1`
+3. Boot your Raspberry Pi
+
+## Development
+
+### Adding New Features
+
+1. Add your source files to the appropriate directory
+2. Update the Makefile if necessary
+3. Build and test using the commands above
+
+### License Compliance
+
+All source files must include the BSD 3-Clause License header. You can check for compliance using:
+
+```bash
+./license-checker.py
+```
+
+If you need to add license headers to new files:
+
+```bash
+./add_license_headers.py
+```
+
+## Troubleshooting
+
+### Build Errors
+
+- **Missing compiler**: Make sure you have installed the appropriate cross-compiler for your target architecture
+- **Linker errors**: Check that all required object files are being included in the link step
+
+### Runtime Errors
+
+- **Kernel doesn't boot**: Verify that the boot code for your architecture is correctly implemented
+- **QEMU crashes**: Make sure you're using the correct QEMU parameters for your architecture
 
 </details>
 
