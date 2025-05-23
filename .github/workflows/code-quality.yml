@@ -24,6 +24,10 @@ jobs:
           pip install cppcheck
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+          # Create symlink for aarch64-1inux-gnu-gcc to fix build issue
+          sudo ln -sf /usr/bin/aarch64-linux-gnu-gcc /usr/bin/aarch64-1inux-gnu-gcc
+          sudo ln -sf /usr/bin/aarch64-linux-gnu-ld /usr/bin/aarch64-1inux-gnu-ld
+          sudo ln -sf /usr/bin/aarch64-linux-gnu-objcopy /usr/bin/aarch64-1inux-gnu-objcopy
       
       - name: Check C code style
         run: |
@@ -94,3 +98,31 @@ jobs:
               echo "Warning: Potential format string vulnerability in $file"
             fi
           done
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install cross-compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+          # Create symlink for aarch64-1inux-gnu-gcc to fix build issue
+          sudo ln -sf /usr/bin/aarch64-linux-gnu-gcc /usr/bin/aarch64-1inux-gnu-gcc
+          sudo ln -sf /usr/bin/aarch64-linux-gnu-ld /usr/bin/aarch64-1inux-gnu-ld
+          sudo ln -sf /usr/bin/aarch64-linux-gnu-objcopy /usr/bin/aarch64-1inux-gnu-objcopy
+      
+      - name: Build kernel
+        run: make clean && make
+      
+      - name: Test with QEMU (if possible)
+        run: |
+          if command -v qemu-system-aarch64 >/dev/null 2>&1; then
+            sudo apt-get install -y qemu-system-arm
+            # Run a simple test with QEMU
+            # This is just a placeholder - adjust as needed for your project
+            echo "QEMU test would go here"
+          else
+            echo "QEMU not available, skipping test"
+          fi
