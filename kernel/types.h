@@ -67,7 +67,9 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────#ifndef TYPES_H
+// ─────────────────────────────────────────────────────────────────────────────
+
+#ifndef TYPES_H
 #define TYPES_H
 
 // Use standard types from compiler

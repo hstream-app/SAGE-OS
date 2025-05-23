@@ -11,6 +11,7 @@
 #include "memory.h"
 #include "uart.h"
 #include <string.h>
+#include <stdio.h>
 
 // Maximum number of models that can be loaded
 #define MAX_MODELS 8
@@ -162,7 +163,7 @@ ai_subsystem_status_t ai_subsystem_load_model(const void* model_data, uint32_t m
     }
     
     // Set model name
-    sprintf(model.name, "Model_%d", model_id);
+    sprintf(model.name, "Model_%u", model_id);
     
     // Set precision (default to FP16)
     model.precision = AI_HAT_PRECISION_FP16;
