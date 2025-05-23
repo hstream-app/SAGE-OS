@@ -361,7 +361,34 @@ ai_hat_status_t ai_hat_load_model(const void* model_data, uint32_t model_size, u
     model->precision = AI_HAT_PRECISION_FP16; // Default precision
     model->input_size = 1024; // Example input size
     model->output_size = 1000; // Example output size
-    sprintf(model->name, "Model_%d", *model_id);
+    
+    // Use a safer method than sprintf to create model name
+    char name_prefix[] = "Model_";
+    memcpy(model->name, name_prefix, sizeof(name_prefix) - 1);
+    
+    // Convert model ID to string
+    char id_str[8];
+    int i = 0;
+    uint32_t id_copy = *model_id;
+    do {
+        id_str[i++] = '0' + (id_copy % 10);
+        id_copy /= 10;
+    } while (id_copy > 0 && i < 7);
+    id_str[i] = '\0';
+    
+    // Reverse the digits
+    for (int j = 0; j < i/2; j++) {
+        char temp = id_str[j];
+        id_str[j] = id_str[i-j-1];
+        id_str[i-j-1] = temp;
+    }
+    
+    // Append to name (ensuring we don't overflow)
+    size_t prefix_len = sizeof(name_prefix) - 1;
+    size_t id_len = i;
+    if (prefix_len + id_len < sizeof(model->name)) {
+        memcpy(model->name + prefix_len, id_str, id_len + 1);
+    }
     
     num_loaded_models++;
     

@@ -47,11 +47,21 @@ void kernel_panic(const char* message) {
 
 // Get kernel version string
 const char* kernel_version() {
-    // Format the version string
-    sprintf(version_str, "v%d.%d.%d", 
-           KERNEL_VERSION_MAJOR,
-           KERNEL_VERSION_MINOR,
-           KERNEL_VERSION_PATCH);
+    // Format the version string using lightweight conversion to avoid bulky stdio
+    char* p = version_str;
+    *p++ = 'v';
+    
+    // Convert major version
+    p += utoa_base(KERNEL_VERSION_MAJOR, p, 10);
+    *p++ = '.';
+    
+    // Convert minor version
+    p += utoa_base(KERNEL_VERSION_MINOR, p, 10);
+    *p++ = '.';
+    
+    // Convert patch version
+    p += utoa_base(KERNEL_VERSION_PATCH, p, 10);
+    *p = '\0';
     
     return version_str;
 }

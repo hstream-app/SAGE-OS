@@ -14,7 +14,7 @@ _start:
 2:  // CPU ID == 0
 
     // Set stack pointer
-    ldr     x1, =_start
+    ldr     x1, =stack_top
     mov     sp, x1
 
     // Clear BSS

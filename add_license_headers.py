@@ -102,10 +102,7 @@ def has_license_header(file_path):
     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
         try:
             content = f.read(2000)  # Read first 2000 chars to check for header
-            for pattern in LICENSE_PATTERNS:
-                if re.search(pattern, content):
-                    return True
-            return False
+            return any(re.search(pattern, content) for pattern in LICENSE_PATTERNS)
         except UnicodeDecodeError:
             # Binary file or non-text file
             return True  # Skip binary files
@@ -145,6 +142,29 @@ def add_license_header(file_path, template_path):
         print(f"Error adding license to {file_path}: {e}")
         return False
 
+def should_process_file(file_path, repo_root):
+    """Determine if a file should be processed for license header addition."""
+    rel_path = os.path.relpath(file_path, repo_root)
+    
+    # Skip excluded files
+    if os.path.basename(file_path) in EXCLUDE_FILES:
+        return False
+        
+    # Skip files in excluded directories
+    if any(exclude_dir in rel_path.split(os.sep) for exclude_dir in EXCLUDE_DIRS):
+        return False
+        
+    # Get comment style
+    comment_style = get_comment_style(file_path)
+    if not comment_style:
+        return False  # Skip files with unknown comment style
+        
+    # Check if file already has a license header
+    if has_license_header(file_path):
+        return False
+        
+    return comment_style
+
 def process_files(directory='.', recursive=True):
     """Process all files in the specified directory."""
     repo_root = os.path.abspath(directory)
@@ -164,29 +184,13 @@ def process_files(directory='.', recursive=True):
             
             for file in files:
                 file_path = os.path.join(root, file)
-                rel_path = os.path.relpath(file_path, repo_root)
+                comment_style = should_process_file(file_path, repo_root)
                 
-                # Skip excluded files
-                if os.path.basename(file_path) in EXCLUDE_FILES:
-                    continue
-                    
-                # Skip files in excluded directories
-                if any(exclude_dir in rel_path.split(os.sep) for exclude_dir in EXCLUDE_DIRS):
-                    continue
-                    
-                # Get comment style
-                comment_style = get_comment_style(file_path)
-                if not comment_style:
-                    continue  # Skip files with unknown comment style
-                    
-                # Check if file already has a license header
-                if has_license_header(file_path):
-                    continue
-                    
-                # Add license header
-                template_path = os.path.join(template_dir, f"{comment_style}.txt")
-                if add_license_header(file_path, template_path):
-                    modified_files.append(rel_path)
+                if comment_style:
+                    # Add license header
+                    template_path = os.path.join(template_dir, f"{comment_style}.txt")
+                    if add_license_header(file_path, template_path):
+                        modified_files.append(os.path.relpath(file_path, repo_root))
     else:
         # Process only files in the specified directory (non-recursive)
         for file in os.listdir(repo_root):
@@ -196,23 +200,13 @@ def process_files(directory='.', recursive=True):
             if os.path.isdir(file_path):
                 continue
                 
-            # Skip excluded files
-            if os.path.basename(file_path) in EXCLUDE_FILES:
-                continue
-                
-            # Get comment style
-            comment_style = get_comment_style(file_path)
-            if not comment_style:
-                continue  # Skip files with unknown comment style
-                
-            # Check if file already has a license header
-            if has_license_header(file_path):
-                continue
-                
-            # Add license header
-            template_path = os.path.join(template_dir, f"{comment_style}.txt")
-            if add_license_header(file_path, template_path):
-                modified_files.append(os.path.relpath(file_path, repo_root))
+            comment_style = should_process_file(file_path, repo_root)
+            
+            if comment_style:
+                # Add license header
+                template_path = os.path.join(template_dir, f"{comment_style}.txt")
+                if add_license_header(file_path, template_path):
+                    modified_files.append(os.path.relpath(file_path, repo_root))
     
     return modified_files
 

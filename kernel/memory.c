@@ -67,7 +67,8 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────#include "memory.h"
+// ─────────────────────────────────────────────────────────────────────────────
+#include "memory.h"
 #include "uart.h"
 
 // Simple memory allocator using a free list approach
@@ -98,10 +99,10 @@ void memory_init() {
     free_list->next = NULL;
     
     total_memory = MEMORY_POOL_SIZE;
-    used_memory = sizeof(block_header_t);  // Account for the initial header
+    used_memory = 0;  // Free block header is not part of allocated memory
     
     uart_puts("Memory management initialized\n");
-    uart_printf("Total memory: %d bytes\n", total_memory);
+    uart_printf("Total memory: %zu bytes\n", total_memory);
 }
 
 // Find a free block of sufficient size
@@ -118,10 +119,12 @@ static block_header_t* find_free_block(size_t size) {
     return NULL;  // No suitable block found
 }
 
+#define MIN_BLOCK_SIZE 16  // Minimum size for a memory block
+
 // Split a block if it's too large
 static void split_block(block_header_t* block, size_t size) {
     // Only split if the remaining size is large enough for a new block
-    if (block->size >= size + sizeof(block_header_t) + 16) {
+    if (block->size >= size + sizeof(block_header_t) + MIN_BLOCK_SIZE) {
         block_header_t* new_block = (block_header_t*)((uint8_t*)block + size);
         new_block->size = block->size - size;
         new_block->is_free = 1;
@@ -180,8 +183,28 @@ void kfree(void* ptr) {
         return;
     }
     
+    // Validate pointer is within memory pool range
+    if (ptr < (void*)memory_pool || ptr >= (void*)(memory_pool + MEMORY_POOL_SIZE)) {
+        uart_puts("Memory free failed: Invalid pointer outside memory pool range\n");
+        return;
+    }
+    
     // Get the block header
     block_header_t* block = (block_header_t*)((uint8_t*)ptr - sizeof(block_header_t));
+    
+    // Validate block pointer is properly aligned and within range
+    if ((uintptr_t)block % sizeof(void*) != 0 || 
+        (void*)block < (void*)memory_pool || 
+        (void*)block >= (void*)(memory_pool + MEMORY_POOL_SIZE)) {
+        uart_puts("Memory free failed: Invalid block alignment or range\n");
+        return;
+    }
+    
+    // Validate block size is reasonable
+    if (block->size == 0 || block->size > MEMORY_POOL_SIZE) {
+        uart_puts("Memory free failed: Invalid block size\n");
+        return;
+    }
     
     // Mark the block as free
     block->is_free = 1;
@@ -209,9 +232,9 @@ size_t memory_used() {
 // Print memory statistics
 void memory_stats() {
     uart_printf("Memory statistics:\n");
-    uart_printf("  Total: %d bytes\n", memory_total());
-    uart_printf("  Used:  %d bytes\n", memory_used());
-    uart_printf("  Free:  %d bytes\n", memory_free());
+    uart_printf("  Total: %zu bytes\n", memory_total());
+    uart_printf("  Used:  %zu bytes\n", memory_used());
+    uart_printf("  Free:  %zu bytes\n", memory_free());
     
     // Print the free list for debugging
     uart_printf("Free blocks:\n");
@@ -219,8 +242,8 @@ void memory_stats() {
     int i = 0;
     
     while (current) {
-        uart_printf("  Block %d: address=%x, size=%d, is_free=%d\n", 
-                   i++, (uint32_t)current, current->size, current->is_free);
+        uart_printf("  Block %d: address=%p, size=%zu, is_free=%d\n", 
+                   i++, (void*)current, current->size, current->is_free);
         current = current->next;
     }
 }

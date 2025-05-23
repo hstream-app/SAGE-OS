@@ -67,7 +67,8 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────#include "stdio.h"
+// ─────────────────────────────────────────────────────────────────────────────
+#include "stdio.h"
 #include "types.h"
 #include <stdarg.h>
 
@@ -78,6 +79,29 @@ int sprintf(char* buffer, const char* format, ...) {
     int result = vsprintf(buffer, format, args);
     va_end(args);
     return result;
+}
+
+// Helper: convert unsigned value to ASCII in given base, returns number of digits written
+static int utoa_base(unsigned val, char *buf, int base) {
+    static const char *digits = "0123456789abcdef";
+    char *start = buf;
+    // at least one digit
+    do {
+        *buf++ = digits[val % base];
+        val /= base;
+    } while (val > 0);
+    // reverse [start..buf)
+    for (char *p = start, *q = buf - 1; p < q; ++p, --q) {
+        char t = *p; *p = *q; *q = t;
+    }
+    return buf - start;
+}
+
+// Helper: copy a C-string, return number of bytes (excl. NUL)
+static int copy_str(char *dst, const char *src) {
+    char *start = dst;
+    while ((*dst++ = *src++));
+    return dst - start - 1;
 }
 
 // Format a string with a va_list and store it in a buffer
@@ -94,72 +118,40 @@ int vsprintf(char* buffer, const char* format, va_list args) {
         fmt_ptr++; // Skip '%'
         
         // Handle format specifiers
-        switch (*fmt_ptr) {
+        switch (*fmt_ptr++) {
             case 's': {
-                char* s = va_arg(args, char*);
-                while (*s) {
-                    *buf_ptr++ = *s++;
-                }
+                buf_ptr += copy_str(buf_ptr, va_arg(args, const char*));
                 break;
             }
             case 'd': {
-                int val = va_arg(args, int);
-                if (val < 0) {
+                int v = va_arg(args, int);
+                if (v < 0) {
                     *buf_ptr++ = '-';
-                    val = -val;
+                    v = -v;
                 }
-                
-                // Convert to string (reversed)
-                char temp[12];
-                int i = 0;
-                do {
-                    temp[i++] = '0' + (val % 10);
-                    val /= 10;
-                } while (val > 0);
-                
-                // Copy in correct order
-                while (i > 0) {
-                    *buf_ptr++ = temp[--i];
-                }
+                buf_ptr += utoa_base((unsigned)v, buf_ptr, 10);
                 break;
             }
             case 'x': {
-                unsigned int val = va_arg(args, unsigned int);
-                
-                // Convert to hex string (reversed)
-                char temp[12];
-                int i = 0;
-                do {
-                    int digit = val & 0xF;
-                    temp[i++] = digit < 10 ? '0' + digit : 'a' + digit - 10;
-                    val >>= 4;
-                } while (val > 0);
-                
-                // Add 0x prefix
+                unsigned v = va_arg(args, unsigned);
                 *buf_ptr++ = '0';
                 *buf_ptr++ = 'x';
-                
-                // Copy in correct order
-                while (i > 0) {
-                    *buf_ptr++ = temp[--i];
-                }
+                buf_ptr += utoa_base(v, buf_ptr, 16);
                 break;
             }
             case 'c': {
-                char c = (char)va_arg(args, int);
-                *buf_ptr++ = c;
+                *buf_ptr++ = (char)va_arg(args, int);
                 break;
             }
             case '%': {
                 *buf_ptr++ = '%';
                 break;
             }
-            default:
-                *buf_ptr++ = *fmt_ptr;
+            default: {
+                *buf_ptr++ = *(fmt_ptr - 1);
                 break;
+            }
         }
-        
-        fmt_ptr++;
     }
     
     // Null terminate

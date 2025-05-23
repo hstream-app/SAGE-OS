@@ -67,10 +67,14 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────#ifndef KERNEL_H
+// ─────────────────────────────────────────────────────────────────────────────
+#ifndef KERNEL_H
 #define KERNEL_H
 
 #include "types.h"
+
+// Helper function for integer to string conversion
+int utoa_base(unsigned val, char *buf, int base);
 
 // Kernel version information
 #define KERNEL_VERSION_MAJOR 0
