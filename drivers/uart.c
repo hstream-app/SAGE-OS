@@ -1,4 +1,5 @@
 #include "uart.h"
+#include <stdint.h>
 
 #define UART0_BASE 0x3F201000
 
