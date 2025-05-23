@@ -29,15 +29,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "kernel.h"
-#include "../drivers/uart.h"
+#ifndef MINIMAL_UART_H
+#define MINIMAL_UART_H
 
-void kernel_main() {
-    uart_init();
-    uart_puts("SAGE OS: Boot successful.\n");
-    while (1) {
-        uart_puts("sage> ");
-        char c = uart_getc();
-        uart_putc(c); // Echo for now
-    }
-}
+// Minimal UART interface for early boot stage
+
+void minimal_uart_init(void);
+void minimal_uart_putc(char c);
+char minimal_uart_getc(void);
+void minimal_uart_puts(const char* str);
+
+#endif /* MINIMAL_UART_H */
