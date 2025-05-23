@@ -164,3 +164,36 @@ int strncmp(const char* s1, const char* s2, size_t n) {
     
     return *(const unsigned char*)s1 - *(const unsigned char*)s2;
 }
+
+// Convert unsigned integer to string with specified base
+char* utoa_base(unsigned int value, char* str, int base) {
+    const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+    char* ptr = str;
+    char* start = str;
+    unsigned int temp;
+    
+    // Check if the base is valid
+    if (base < 2 || base > 36) {
+        *str = '\0';
+        return str;
+    }
+    
+    // Convert to the specified base
+    do {
+        temp = value;
+        value /= base;
+        *ptr++ = digits[temp - value * base];
+    } while (value);
+    
+    // Add null terminator
+    *ptr-- = '\0';
+    
+    // Reverse the string
+    while (start < ptr) {
+        char temp = *start;
+        *start++ = *ptr;
+        *ptr-- = temp;
+    }
+    
+    return str;
+}
