@@ -11,8 +11,8 @@ LDFLAGS=-T linker.ld
 
 # Source files
 BOOT_SOURCES = $(wildcard boot/*.S)
-KERNEL_SOURCES = $(wildcard kernel/*.c)
-DRIVER_SOURCES = $(wildcard drivers/*.c)
+KERNEL_SOURCES = $(wildcard kernel/*.c) $(wildcard kernel/*/*.c)
+DRIVER_SOURCES = $(wildcard drivers/*.c) $(wildcard drivers/*/*.c)
 
 SOURCES = $(BOOT_SOURCES) $(KERNEL_SOURCES) $(DRIVER_SOURCES)
 OBJECTS = $(SOURCES:.c=.o)

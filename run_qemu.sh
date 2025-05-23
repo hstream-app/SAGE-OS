@@ -13,6 +13,9 @@ fi
 QEMU_CMD="qemu-system-aarch64"
 QEMU_OPTS="-M raspi3 -kernel kernel8.img -serial stdio"
 
+# Raspberry Pi model
+RPI_MODEL="raspi3"
+
 # Check if QEMU is installed
 if ! command -v $QEMU_CMD &> /dev/null; then
     echo "Error: $QEMU_CMD not found. Please install QEMU."
@@ -24,6 +27,7 @@ fi
 # Parse command line arguments
 DEBUG=0
 GRAPHICS=0
+RPI_VERSION=3
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -35,12 +39,30 @@ while [[ $# -gt 0 ]]; do
             GRAPHICS=1
             shift
             ;;
+        -p|--platform)
+            if [[ $2 == "rpi3" ]]; then
+                RPI_MODEL="raspi3"
+                RPI_VERSION=3
+            elif [[ $2 == "rpi4" ]]; then
+                RPI_MODEL="raspi3"  # QEMU doesn't have raspi4 yet, use raspi3
+                RPI_VERSION=4
+            elif [[ $2 == "rpi5" ]]; then
+                RPI_MODEL="raspi3"  # QEMU doesn't have raspi5 yet, use raspi3
+                RPI_VERSION=5
+            else
+                echo "Unknown platform: $2"
+                echo "Supported platforms: rpi3, rpi4, rpi5"
+                exit 1
+            fi
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: $0 [options]"
             echo "Options:"
-            echo "  -d, --debug     Run with GDB server enabled"
-            echo "  -g, --graphics  Enable graphical output (not just serial)"
-            echo "  -h, --help      Show this help message"
+            echo "  -d, --debug             Run with GDB server enabled"
+            echo "  -g, --graphics          Enable graphical output (not just serial)"
+            echo "  -p, --platform PLATFORM Specify platform (rpi3, rpi4, rpi5)"
+            echo "  -h, --help              Show this help message"
             exit 0
             ;;
         *)
@@ -64,6 +86,16 @@ if [ $GRAPHICS -eq 1 ]; then
     echo "Graphics mode enabled"
 else
     QEMU_OPTS="$QEMU_OPTS -nographic"
+fi
+
+# Update QEMU options based on platform
+QEMU_OPTS="-M $RPI_MODEL -kernel kernel8.img -serial stdio"
+
+# Show platform information
+echo "Platform: Raspberry Pi $RPI_VERSION"
+if [ $RPI_VERSION -eq 5 ]; then
+    echo "Note: QEMU doesn't fully support Raspberry Pi 5 yet, using Raspberry Pi 3 emulation"
+    echo "Some features like AI HAT+ may not work correctly in emulation"
 fi
 
 # Run QEMU

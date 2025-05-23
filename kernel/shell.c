@@ -2,6 +2,7 @@
 #include "uart.h"
 #include "memory.h"
 #include "types.h"
+#include "ai/ai_subsystem.h"
 
 #define MAX_COMMAND_LENGTH 256
 #define MAX_ARGS 16
@@ -31,6 +32,7 @@ static void cmd_clear(int argc, char* argv[]);
 static void cmd_meminfo(int argc, char* argv[]);
 static void cmd_reboot(int argc, char* argv[]);
 static void cmd_version(int argc, char* argv[]);
+static void cmd_ai(int argc, char* argv[]);
 
 // Command table
 static const command_t commands[] = {
@@ -40,12 +42,21 @@ static const command_t commands[] = {
     {"meminfo", "Display memory information",         cmd_meminfo},
     {"reboot",  "Reboot the system",                  cmd_reboot},
     {"version", "Display OS version information",     cmd_version},
+    {"ai",      "AI subsystem commands",              cmd_ai},
     {NULL, NULL, NULL}  // Terminator
 };
 
 // Initialize the shell
 void shell_init() {
     uart_puts("SAGE OS Shell initialized\n");
+    
+    // Initialize AI subsystem
+    ai_subsystem_status_t status = ai_subsystem_init();
+    if (status == AI_SUBSYSTEM_SUCCESS) {
+        uart_puts("AI subsystem initialized\n");
+    } else {
+        uart_puts("AI subsystem initialization failed\n");
+    }
 }
 
 // Split a command into arguments
@@ -179,6 +190,15 @@ static void cmd_help(int argc, char* argv[]) {
     for (int i = 0; commands[i].name != NULL; i++) {
         uart_printf("  %-10s - %s\n", commands[i].name, commands[i].description);
     }
+    
+    // If ai command help is requested, show subcommands
+    if (argc > 1 && strcmp(argv[1], "ai") == 0) {
+        uart_puts("\nAI subsystem commands:\n");
+        uart_puts("  ai info     - Display AI subsystem information\n");
+        uart_puts("  ai temp     - Show AI HAT+ temperature\n");
+        uart_puts("  ai power    - Show AI HAT+ power consumption\n");
+        uart_puts("  ai models   - List loaded AI models\n");
+    }
 }
 
 static void cmd_echo(int argc, char* argv[]) {
@@ -225,4 +245,143 @@ static void cmd_version(int argc, char* argv[]) {
     uart_puts("SAGE OS v0.1.0\n");
     uart_puts("Self-Aware General Environment Operating System\n");
     uart_puts("Copyright (c) 2025 SAGE OS Team\n");
+}
+
+// AI command handler
+static void cmd_ai(int argc, char* argv[]) {
+    if (argc < 2) {
+        uart_puts("AI subsystem commands:\n");
+        uart_puts("  info     - Display AI subsystem information\n");
+        uart_puts("  temp     - Show AI HAT+ temperature\n");
+        uart_puts("  power    - Show AI HAT+ power consumption\n");
+        uart_puts("  models   - List loaded AI models\n");
+        return;
+    }
+    
+    if (strcmp(argv[1], "info") == 0) {
+        ai_hat_info_t info;
+        ai_subsystem_status_t status = ai_subsystem_get_info(&info);
+        
+        if (status == AI_SUBSYSTEM_SUCCESS) {
+            uart_puts("AI Subsystem Information:\n");
+            uart_printf("  Version: %d.%d\n", (info.version >> 8) & 0xFF, info.version & 0xFF);
+            uart_printf("  Max TOPS: %d\n", info.max_tops);
+            uart_printf("  Memory: %d MB\n", info.memory_size / (1024 * 1024));
+            uart_printf("  Temperature: %d°C\n", info.temperature);
+            uart_printf("  Power consumption: %d mW\n", info.power_consumption);
+            
+            const char* power_mode;
+            switch (info.power_mode) {
+                case AI_HAT_POWER_OFF:
+                    power_mode = "Off";
+                    break;
+                case AI_HAT_POWER_LOW:
+                    power_mode = "Low";
+                    break;
+                case AI_HAT_POWER_MEDIUM:
+                    power_mode = "Medium";
+                    break;
+                case AI_HAT_POWER_HIGH:
+                    power_mode = "High";
+                    break;
+                case AI_HAT_POWER_MAX:
+                    power_mode = "Maximum";
+                    break;
+                default:
+                    power_mode = "Unknown";
+                    break;
+            }
+            uart_printf("  Power mode: %s\n", power_mode);
+        } else {
+            uart_puts("Failed to get AI subsystem information\n");
+        }
+    } else if (strcmp(argv[1], "temp") == 0) {
+        uint32_t temperature;
+        ai_subsystem_status_t status = ai_subsystem_get_temperature(&temperature);
+        
+        if (status == AI_SUBSYSTEM_SUCCESS) {
+            uart_printf("AI HAT+ temperature: %d°C\n", temperature);
+        } else {
+            uart_puts("Failed to get AI HAT+ temperature\n");
+        }
+    } else if (strcmp(argv[1], "power") == 0) {
+        uint32_t power;
+        ai_subsystem_status_t status = ai_subsystem_get_power_consumption(&power);
+        
+        if (status == AI_SUBSYSTEM_SUCCESS) {
+            uart_printf("AI HAT+ power consumption: %d mW\n", power);
+        } else {
+            uart_puts("Failed to get AI HAT+ power consumption\n");
+        }
+    } else if (strcmp(argv[1], "models") == 0) {
+        ai_model_descriptor_t models[8];
+        uint32_t num_models;
+        ai_subsystem_status_t status = ai_subsystem_get_models(models, 8, &num_models);
+        
+        if (status == AI_SUBSYSTEM_SUCCESS) {
+            if (num_models == 0) {
+                uart_puts("No AI models loaded\n");
+            } else {
+                uart_printf("Loaded AI models (%d):\n", num_models);
+                for (uint32_t i = 0; i < num_models; i++) {
+                    uart_printf("  %d: %s (ID: %d)\n", i + 1, models[i].name, models[i].id);
+                    
+                    const char* type;
+                    switch (models[i].type) {
+                        case AI_MODEL_TYPE_CLASSIFICATION:
+                            type = "Classification";
+                            break;
+                        case AI_MODEL_TYPE_DETECTION:
+                            type = "Detection";
+                            break;
+                        case AI_MODEL_TYPE_SEGMENTATION:
+                            type = "Segmentation";
+                            break;
+                        case AI_MODEL_TYPE_GENERATION:
+                            type = "Generation";
+                            break;
+                        case AI_MODEL_TYPE_CUSTOM:
+                            type = "Custom";
+                            break;
+                        default:
+                            type = "Unknown";
+                            break;
+                    }
+                    uart_printf("     Type: %s\n", type);
+                    
+                    const char* precision;
+                    switch (models[i].precision) {
+                        case AI_HAT_PRECISION_FP32:
+                            precision = "FP32";
+                            break;
+                        case AI_HAT_PRECISION_FP16:
+                            precision = "FP16";
+                            break;
+                        case AI_HAT_PRECISION_INT8:
+                            precision = "INT8";
+                            break;
+                        case AI_HAT_PRECISION_INT4:
+                            precision = "INT4";
+                            break;
+                        default:
+                            precision = "Unknown";
+                            break;
+                    }
+                    uart_printf("     Precision: %s\n", precision);
+                    
+                    uart_printf("     Input: [%d, %d, %d, %d]\n",
+                               models[i].input_dims[0], models[i].input_dims[1],
+                               models[i].input_dims[2], models[i].input_dims[3]);
+                    uart_printf("     Output: [%d, %d, %d, %d]\n",
+                               models[i].output_dims[0], models[i].output_dims[1],
+                               models[i].output_dims[2], models[i].output_dims[3]);
+                }
+            }
+        } else {
+            uart_puts("Failed to get AI models\n");
+        }
+    } else {
+        uart_printf("Unknown AI command: %s\n", argv[1]);
+        uart_puts("Type 'ai' for a list of AI commands\n");
+    }
 }
