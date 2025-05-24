@@ -257,7 +257,11 @@ while true; do
             ;;
         5)
             echo -e "${YELLOW}🏗️  Building for all architectures...${NC}"
-            ./build.sh build-all
+            if [ -f "./build-all-architectures-macos.sh" ]; then
+                ./build-all-architectures-macos.sh
+            else
+                ./build.sh build-all
+            fi
             echo -e "${GREEN}✅ All builds completed${NC}"
             ;;
         6)

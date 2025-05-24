@@ -557,7 +557,14 @@ main() {
                 log_error "Dependencies not satisfied. Run '$0 install-deps' first."
                 exit 1
             fi
-            build_all_arch "${2:-rpi4}" "${3:-kernel}"
+            # Use the comprehensive multi-architecture build script
+            if [ "$HOST_OS" = "macos" ] && [ -f "./build-all-architectures-macos.sh" ]; then
+                ./build-all-architectures-macos.sh
+            elif [ -f "./build-all-architectures.sh" ]; then
+                ./build-all-architectures.sh
+            else
+                build_all_arch "${2:-rpi4}" "${3:-kernel}"
+            fi
             ;;
         build-formats)
             if ! check_dependencies; then
