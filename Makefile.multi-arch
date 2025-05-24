@@ -1,0 +1,458 @@
+# SAGE OS Multi-Architecture Build System
+# Supports building for multiple architectures and image formats on macOS
+
+# Project information
+PROJECT_NAME = SAGE-OS
+VERSION = 0.1.0
+BUILD_DATE = $(shell date +%Y%m%d-%H%M%S)
+
+# Build configuration
+BUILD_ROOT = build
+DIST_DIR = dist
+TOOLS_DIR = tools
+
+# Supported architectures
+SUPPORTED_ARCHS = aarch64 x86_64 riscv64 arm
+DEFAULT_ARCH = aarch64
+
+# Supported image formats
+SUPPORTED_FORMATS = kernel iso img docker qemu
+DEFAULT_FORMAT = kernel
+
+# Supported platforms
+SUPPORTED_PLATFORMS = rpi3 rpi4 rpi5 x86_64 qemu generic
+DEFAULT_PLATFORM = rpi4
+
+# Build options
+ARCH ?= $(DEFAULT_ARCH)
+FORMAT ?= $(DEFAULT_FORMAT)
+PLATFORM ?= $(DEFAULT_PLATFORM)
+ENABLE_AI ?= OFF
+ENABLE_CRYPTO ?= ON
+ENABLE_DEBUG ?= OFF
+MEMORY_SIZE ?= 1024
+
+# macOS detection and toolchain setup
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    HOST_OS = macos
+    HOMEBREW_PREFIX = $(shell brew --prefix 2>/dev/null || echo /opt/homebrew)
+    TOOLCHAIN_PATH = $(HOMEBREW_PREFIX)/bin
+else
+    HOST_OS = linux
+    TOOLCHAIN_PATH = /usr/bin
+endif
+
+# Architecture-specific toolchain configuration
+ifeq ($(ARCH),aarch64)
+    CROSS_PREFIX = aarch64-linux-gnu-
+    QEMU_ARCH = aarch64
+    QEMU_MACHINE = raspi3
+    KERNEL_ARCH = arm64
+else ifeq ($(ARCH),arm)
+    CROSS_PREFIX = arm-linux-gnueabihf-
+    QEMU_ARCH = arm
+    QEMU_MACHINE = raspi2
+    KERNEL_ARCH = arm
+else ifeq ($(ARCH),x86_64)
+    CROSS_PREFIX = x86_64-linux-gnu-
+    QEMU_ARCH = x86_64
+    QEMU_MACHINE = pc
+    KERNEL_ARCH = x86_64
+else ifeq ($(ARCH),riscv64)
+    CROSS_PREFIX = riscv64-linux-gnu-
+    QEMU_ARCH = riscv64
+    QEMU_MACHINE = virt
+    KERNEL_ARCH = riscv
+else
+    $(error Unsupported architecture: $(ARCH))
+endif
+
+# Toolchain binaries
+CC = $(TOOLCHAIN_PATH)/$(CROSS_PREFIX)gcc
+LD = $(TOOLCHAIN_PATH)/$(CROSS_PREFIX)ld
+OBJCOPY = $(TOOLCHAIN_PATH)/$(CROSS_PREFIX)objcopy
+OBJDUMP = $(TOOLCHAIN_PATH)/$(CROSS_PREFIX)objdump
+STRIP = $(TOOLCHAIN_PATH)/$(CROSS_PREFIX)strip
+AR = $(TOOLCHAIN_PATH)/$(CROSS_PREFIX)ar
+
+# Build directories
+ARCH_BUILD_DIR = $(BUILD_ROOT)/$(ARCH)
+ARCH_DIST_DIR = $(DIST_DIR)/$(ARCH)
+
+# Compiler flags
+INCLUDES = -I. -Ikernel -Idrivers -Ikernel/ai
+WARNINGS = -Wall -Wextra -Werror -Wno-unused-parameter
+OPTIMIZATION = -O2
+DEBUG_FLAGS = $(if $(filter ON,$(ENABLE_DEBUG)),-g -DDEBUG,-DNDEBUG)
+
+CFLAGS = -nostdlib -nostartfiles -ffreestanding $(OPTIMIZATION) $(WARNINGS) $(DEBUG_FLAGS) $(INCLUDES)
+LDFLAGS = -T linker.ld -nostdlib
+ASFLAGS = $(CFLAGS)
+
+# Architecture-specific flags
+ifeq ($(ARCH),aarch64)
+    CFLAGS += -mcpu=cortex-a72 -mtune=cortex-a72
+else ifeq ($(ARCH),arm)
+    CFLAGS += -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard
+else ifeq ($(ARCH),x86_64)
+    CFLAGS += -m64 -mcmodel=kernel -mno-red-zone -mno-mmx -mno-sse -mno-sse2
+else ifeq ($(ARCH),riscv64)
+    CFLAGS += -march=rv64imac -mabi=lp64
+endif
+
+# Platform-specific configuration
+ifeq ($(PLATFORM),rpi5)
+    CFLAGS += -DRPI5 -DENABLE_AI_HAT_PLUS=$(ENABLE_AI_HAT_PLUS)
+    QEMU_MACHINE = raspi3  # QEMU doesn't support RPi5 yet
+else ifeq ($(PLATFORM),rpi4)
+    CFLAGS += -DRPI4
+    QEMU_MACHINE = raspi3  # QEMU doesn't support RPi4 yet
+else ifeq ($(PLATFORM),rpi3)
+    CFLAGS += -DRPI3
+    QEMU_MACHINE = raspi3
+endif
+
+# Feature flags
+ifeq ($(ENABLE_AI),ON)
+    CFLAGS += -DENABLE_AI
+endif
+ifeq ($(ENABLE_CRYPTO),ON)
+    CFLAGS += -DENABLE_CRYPTO
+endif
+
+# Source files
+BOOT_SOURCES = $(wildcard boot/*.S)
+KERNEL_SOURCES = $(wildcard kernel/*.c) $(wildcard kernel/*/*.c)
+DRIVER_SOURCES = $(wildcard drivers/*.c) $(wildcard drivers/*/*.c)
+AI_SOURCES = $(if $(filter ON,$(ENABLE_AI)),$(wildcard kernel/ai/*.c),)
+
+ALL_SOURCES = $(BOOT_SOURCES) $(KERNEL_SOURCES) $(DRIVER_SOURCES) $(AI_SOURCES)
+OBJECTS = $(patsubst %.c,$(ARCH_BUILD_DIR)/%.o,$(filter %.c,$(ALL_SOURCES)))
+OBJECTS += $(patsubst %.S,$(ARCH_BUILD_DIR)/%.o,$(filter %.S,$(ALL_SOURCES)))
+
+# Output files
+KERNEL_ELF = $(ARCH_BUILD_DIR)/kernel.elf
+KERNEL_IMG = $(ARCH_BUILD_DIR)/kernel.img
+KERNEL_MAP = $(ARCH_BUILD_DIR)/kernel.map
+KERNEL_DUMP = $(ARCH_BUILD_DIR)/kernel.dump
+
+# Distribution files
+DIST_KERNEL = $(ARCH_DIST_DIR)/$(PROJECT_NAME)-$(VERSION)-$(ARCH)-$(PLATFORM).img
+DIST_ISO = $(ARCH_DIST_DIR)/$(PROJECT_NAME)-$(VERSION)-$(ARCH)-$(PLATFORM).iso
+DIST_SDCARD = $(ARCH_DIST_DIR)/$(PROJECT_NAME)-$(VERSION)-$(ARCH)-$(PLATFORM)-sdcard.img
+DIST_DOCKER = $(PROJECT_NAME):$(VERSION)-$(ARCH)
+
+# Default target
+.PHONY: all
+all: check-deps kernel
+
+# Help target
+.PHONY: help
+help:
+	@echo "SAGE OS Multi-Architecture Build System"
+	@echo "========================================"
+	@echo ""
+	@echo "Usage: make [target] [options]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  all                 Build kernel for current architecture"
+	@echo "  kernel              Build kernel image"
+	@echo "  iso                 Build ISO image"
+	@echo "  sdcard              Build SD card image"
+	@echo "  docker              Build Docker image"
+	@echo "  qemu                Run in QEMU"
+	@echo "  debug               Run in QEMU with debug"
+	@echo "  all-arch            Build for all architectures"
+	@echo "  all-formats         Build all image formats"
+	@echo "  clean               Clean build files"
+	@echo "  distclean           Clean all build and dist files"
+	@echo "  install-deps        Install build dependencies"
+	@echo "  check-deps          Check build dependencies"
+	@echo "  info                Show build configuration"
+	@echo ""
+	@echo "Options:"
+	@echo "  ARCH={aarch64|x86_64|riscv64|arm}     Target architecture (default: $(DEFAULT_ARCH))"
+	@echo "  PLATFORM={rpi3|rpi4|rpi5|x86_64|generic} Target platform (default: $(DEFAULT_PLATFORM))"
+	@echo "  FORMAT={kernel|iso|img|docker|qemu}   Output format (default: $(DEFAULT_FORMAT))"
+	@echo "  ENABLE_AI={ON|OFF}                    Enable AI subsystem (default: $(ENABLE_AI))"
+	@echo "  ENABLE_CRYPTO={ON|OFF}                Enable crypto support (default: $(ENABLE_CRYPTO))"
+	@echo "  ENABLE_DEBUG={ON|OFF}                 Enable debug build (default: $(ENABLE_DEBUG))"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make ARCH=aarch64 PLATFORM=rpi5 ENABLE_AI=ON"
+	@echo "  make all-arch"
+	@echo "  make iso ARCH=x86_64"
+	@echo "  make qemu ARCH=aarch64 PLATFORM=rpi4"
+
+# Check dependencies
+.PHONY: check-deps
+check-deps:
+	@echo "Checking build dependencies for $(HOST_OS)..."
+	@if [ "$(HOST_OS)" = "macos" ]; then \
+		if ! command -v brew >/dev/null 2>&1; then \
+			echo "Error: Homebrew not found. Please install Homebrew first."; \
+			echo "Visit: https://brew.sh"; \
+			exit 1; \
+		fi; \
+		if ! command -v $(CC) >/dev/null 2>&1; then \
+			echo "Error: Cross-compiler $(CC) not found."; \
+			echo "Run 'make install-deps' to install required toolchains."; \
+			exit 1; \
+		fi; \
+	fi
+	@if ! command -v qemu-system-$(QEMU_ARCH) >/dev/null 2>&1; then \
+		echo "Warning: QEMU for $(QEMU_ARCH) not found. QEMU targets will not work."; \
+	fi
+	@echo "Dependencies check passed for $(ARCH) architecture."
+
+# Install dependencies (macOS)
+.PHONY: install-deps
+install-deps:
+ifeq ($(HOST_OS),macos)
+	@echo "Installing build dependencies on macOS..."
+	brew install qemu
+	brew tap messense/macos-cross-toolchains
+	@if [ "$(ARCH)" = "aarch64" ]; then \
+		brew install aarch64-unknown-linux-gnu; \
+	elif [ "$(ARCH)" = "x86_64" ]; then \
+		brew install x86_64-unknown-linux-gnu; \
+	elif [ "$(ARCH)" = "riscv64" ]; then \
+		brew install riscv64-unknown-linux-gnu; \
+	elif [ "$(ARCH)" = "arm" ]; then \
+		brew install arm-unknown-linux-gnueabihf; \
+	fi
+	brew install cdrtools  # For ISO creation
+	@echo "Dependencies installed successfully."
+else
+	@echo "Dependency installation for $(HOST_OS) not implemented."
+	@echo "Please install cross-compilation toolchains manually."
+endif
+
+# Create build directories
+$(ARCH_BUILD_DIR):
+	@mkdir -p $(ARCH_BUILD_DIR)/boot $(ARCH_BUILD_DIR)/kernel $(ARCH_BUILD_DIR)/drivers $(ARCH_BUILD_DIR)/kernel/ai
+
+$(ARCH_DIST_DIR):
+	@mkdir -p $(ARCH_DIST_DIR)
+
+# Compile C sources
+$(ARCH_BUILD_DIR)/%.o: %.c | $(ARCH_BUILD_DIR)
+	@mkdir -p $(dir $@)
+	@echo "CC [$(ARCH)] $<"
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile assembly sources
+$(ARCH_BUILD_DIR)/%.o: %.S | $(ARCH_BUILD_DIR)
+	@mkdir -p $(dir $@)
+	@echo "AS [$(ARCH)] $<"
+	@$(CC) $(ASFLAGS) -c $< -o $@
+
+# Link kernel
+$(KERNEL_ELF): $(OBJECTS)
+	@echo "LD [$(ARCH)] $@"
+	@$(LD) $(LDFLAGS) -Map=$(KERNEL_MAP) -o $@ $(OBJECTS)
+
+# Create kernel image
+$(KERNEL_IMG): $(KERNEL_ELF)
+	@echo "OBJCOPY [$(ARCH)] $@"
+	@$(OBJCOPY) -O binary $< $@
+	@$(OBJDUMP) -D $(KERNEL_ELF) > $(KERNEL_DUMP)
+	@echo "Kernel built successfully: $@"
+	@echo "Size: $$(du -h $@ | cut -f1)"
+
+# Build kernel
+.PHONY: kernel
+kernel: check-deps $(KERNEL_IMG)
+
+# Create distribution kernel
+$(DIST_KERNEL): $(KERNEL_IMG) | $(ARCH_DIST_DIR)
+	@echo "Creating distribution kernel..."
+	@cp $(KERNEL_IMG) $(DIST_KERNEL)
+	@echo "Distribution kernel: $(DIST_KERNEL)"
+
+# Build ISO image
+.PHONY: iso
+iso: $(DIST_ISO)
+
+$(DIST_ISO): $(KERNEL_IMG) | $(ARCH_DIST_DIR)
+	@echo "Creating ISO image for $(ARCH)..."
+	@mkdir -p $(ARCH_BUILD_DIR)/iso/boot
+	@cp $(KERNEL_IMG) $(ARCH_BUILD_DIR)/iso/boot/kernel.img
+	@if [ "$(PLATFORM)" = "rpi5" ]; then \
+		cp config_rpi5.txt $(ARCH_BUILD_DIR)/iso/boot/config.txt; \
+	else \
+		cp config.txt $(ARCH_BUILD_DIR)/iso/boot/config.txt; \
+	fi
+	@if command -v mkisofs >/dev/null 2>&1; then \
+		mkisofs -o $(DIST_ISO) -b boot/kernel.img -c boot/boot.cat -no-emul-boot $(ARCH_BUILD_DIR)/iso; \
+	elif command -v genisoimage >/dev/null 2>&1; then \
+		genisoimage -o $(DIST_ISO) -b boot/kernel.img -c boot/boot.cat -no-emul-boot $(ARCH_BUILD_DIR)/iso; \
+	else \
+		echo "Error: No ISO creation tool found. Install cdrtools or genisoimage."; \
+		exit 1; \
+	fi
+	@echo "ISO image created: $(DIST_ISO)"
+
+# Build SD card image
+.PHONY: sdcard
+sdcard: $(DIST_SDCARD)
+
+$(DIST_SDCARD): $(KERNEL_IMG) | $(ARCH_DIST_DIR)
+	@echo "Creating SD card image for $(ARCH)..."
+	@dd if=/dev/zero of=$(DIST_SDCARD) bs=1M count=64 2>/dev/null
+	@if command -v mkfs.vfat >/dev/null 2>&1; then \
+		mkfs.vfat $(DIST_SDCARD); \
+		mkdir -p $(ARCH_BUILD_DIR)/mnt; \
+		if [ "$(HOST_OS)" = "macos" ]; then \
+			hdiutil attach $(DIST_SDCARD) -mountpoint $(ARCH_BUILD_DIR)/mnt; \
+			cp $(KERNEL_IMG) $(ARCH_BUILD_DIR)/mnt/kernel8.img; \
+			if [ "$(PLATFORM)" = "rpi5" ]; then \
+				cp config_rpi5.txt $(ARCH_BUILD_DIR)/mnt/config.txt; \
+			else \
+				cp config.txt $(ARCH_BUILD_DIR)/mnt/config.txt; \
+			fi; \
+			hdiutil detach $(ARCH_BUILD_DIR)/mnt; \
+		else \
+			sudo mount $(DIST_SDCARD) $(ARCH_BUILD_DIR)/mnt; \
+			sudo cp $(KERNEL_IMG) $(ARCH_BUILD_DIR)/mnt/kernel8.img; \
+			if [ "$(PLATFORM)" = "rpi5" ]; then \
+				sudo cp config_rpi5.txt $(ARCH_BUILD_DIR)/mnt/config.txt; \
+			else \
+				sudo cp config.txt $(ARCH_BUILD_DIR)/mnt/config.txt; \
+			fi; \
+			sudo umount $(ARCH_BUILD_DIR)/mnt; \
+		fi; \
+		rmdir $(ARCH_BUILD_DIR)/mnt; \
+	else \
+		echo "Error: mkfs.vfat not found. Cannot create SD card image."; \
+		exit 1; \
+	fi
+	@echo "SD card image created: $(DIST_SDCARD)"
+
+# Build Docker image
+.PHONY: docker
+docker: $(KERNEL_IMG)
+	@echo "Creating Docker image for $(ARCH)..."
+	@echo "FROM scratch" > $(ARCH_BUILD_DIR)/Dockerfile
+	@echo "COPY kernel.img /boot/kernel.img" >> $(ARCH_BUILD_DIR)/Dockerfile
+	@echo "COPY config*.txt /boot/" >> $(ARCH_BUILD_DIR)/Dockerfile
+	@echo "LABEL org.opencontainers.image.title=\"SAGE OS\"" >> $(ARCH_BUILD_DIR)/Dockerfile
+	@echo "LABEL org.opencontainers.image.version=\"$(VERSION)\"" >> $(ARCH_BUILD_DIR)/Dockerfile
+	@echo "LABEL org.opencontainers.image.architecture=\"$(ARCH)\"" >> $(ARCH_BUILD_DIR)/Dockerfile
+	@echo "LABEL org.opencontainers.image.description=\"SAGE OS - Self-Aware General Environment Operating System\"" >> $(ARCH_BUILD_DIR)/Dockerfile
+	@if command -v docker >/dev/null 2>&1; then \
+		cd $(ARCH_BUILD_DIR) && docker build -t $(DIST_DOCKER) .; \
+		echo "Docker image created: $(DIST_DOCKER)"; \
+	else \
+		echo "Error: Docker not found. Cannot create Docker image."; \
+		exit 1; \
+	fi
+
+# Run in QEMU
+.PHONY: qemu
+qemu: $(KERNEL_IMG)
+	@echo "Running SAGE OS in QEMU ($(ARCH)/$(PLATFORM))..."
+	@if command -v qemu-system-$(QEMU_ARCH) >/dev/null 2>&1; then \
+		qemu-system-$(QEMU_ARCH) -M $(QEMU_MACHINE) -kernel $(KERNEL_IMG) -serial stdio -nographic; \
+	else \
+		echo "Error: qemu-system-$(QEMU_ARCH) not found."; \
+		echo "Install QEMU or run 'make install-deps'"; \
+		exit 1; \
+	fi
+
+# Debug in QEMU
+.PHONY: debug
+debug: $(KERNEL_IMG)
+	@echo "Running SAGE OS in QEMU with debug ($(ARCH)/$(PLATFORM))..."
+	@echo "Connect with: $(CROSS_PREFIX)gdb $(KERNEL_ELF) -ex 'target remote localhost:1234'"
+	@if command -v qemu-system-$(QEMU_ARCH) >/dev/null 2>&1; then \
+		qemu-system-$(QEMU_ARCH) -M $(QEMU_MACHINE) -kernel $(KERNEL_IMG) -serial stdio -nographic -s -S; \
+	else \
+		echo "Error: qemu-system-$(QEMU_ARCH) not found."; \
+		exit 1; \
+	fi
+
+# Build for all architectures
+.PHONY: all-arch
+all-arch:
+	@for arch in $(SUPPORTED_ARCHS); do \
+		echo "Building for $$arch..."; \
+		$(MAKE) kernel ARCH=$$arch || exit 1; \
+	done
+	@echo "All architectures built successfully."
+
+# Build all formats for current architecture
+.PHONY: all-formats
+all-formats: kernel iso sdcard
+	@echo "All formats built for $(ARCH) architecture."
+
+# Show build information
+.PHONY: info
+info:
+	@echo "SAGE OS Build Configuration"
+	@echo "==========================="
+	@echo "Project: $(PROJECT_NAME) v$(VERSION)"
+	@echo "Build Date: $(BUILD_DATE)"
+	@echo "Host OS: $(HOST_OS)"
+	@echo "Target Architecture: $(ARCH)"
+	@echo "Target Platform: $(PLATFORM)"
+	@echo "Output Format: $(FORMAT)"
+	@echo ""
+	@echo "Toolchain:"
+	@echo "  CC: $(CC)"
+	@echo "  LD: $(LD)"
+	@echo "  OBJCOPY: $(OBJCOPY)"
+	@echo ""
+	@echo "Build Options:"
+	@echo "  AI Support: $(ENABLE_AI)"
+	@echo "  Crypto Support: $(ENABLE_CRYPTO)"
+	@echo "  Debug Build: $(ENABLE_DEBUG)"
+	@echo "  Memory Size: $(MEMORY_SIZE)MB"
+	@echo ""
+	@echo "Directories:"
+	@echo "  Build: $(ARCH_BUILD_DIR)"
+	@echo "  Distribution: $(ARCH_DIST_DIR)"
+	@echo ""
+	@echo "Source Files: $(words $(ALL_SOURCES))"
+	@echo "Object Files: $(words $(OBJECTS))"
+
+# Clean build files
+.PHONY: clean
+clean:
+	@echo "Cleaning build files..."
+	@rm -rf $(BUILD_ROOT)
+	@echo "Build files cleaned."
+
+# Clean all files
+.PHONY: distclean
+distclean: clean
+	@echo "Cleaning distribution files..."
+	@rm -rf $(DIST_DIR)
+	@echo "All files cleaned."
+
+# Install to SD card (macOS compatible)
+.PHONY: install
+install: $(KERNEL_IMG)
+	@echo "Installing SAGE OS to SD card..."
+	@if [ "$(HOST_OS)" = "macos" ]; then \
+		echo "Please insert SD card and run:"; \
+		echo "  diskutil list"; \
+		echo "  diskutil unmountDisk /dev/diskN"; \
+		echo "  sudo dd if=$(DIST_SDCARD) of=/dev/rdiskN bs=1m"; \
+	else \
+		if [ ! -d "/mnt/sdcard" ]; then \
+			echo "Error: /mnt/sdcard not found. Please mount your SD card first."; \
+			exit 1; \
+		fi; \
+		cp $(KERNEL_IMG) /mnt/sdcard/kernel8.img; \
+		if [ "$(PLATFORM)" = "rpi5" ]; then \
+			cp config_rpi5.txt /mnt/sdcard/config.txt; \
+		else \
+			cp config.txt /mnt/sdcard/config.txt; \
+		fi; \
+		echo "Installed to SD card."; \
+	fi
+
+# Phony targets
+.PHONY: all help check-deps install-deps kernel iso sdcard docker qemu debug all-arch all-formats info clean distclean install
