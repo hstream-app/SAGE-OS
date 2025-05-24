@@ -42,7 +42,7 @@ jobs:
         id: check-headers
         continue-on-error: true
         run: |
-          if python add_license_headers.py --check-only --verbose; then
+          if python enhanced_license_headers.py --check-only --verbose; then
             echo "All files have license headers"
             echo "missing_headers=false" >> $GITHUB_OUTPUT
           else
@@ -54,7 +54,7 @@ jobs:
         if: steps.check-headers.outputs.missing_headers == 'true'
         run: |
           # Add license headers to files
-          python add_license_headers.py --verbose
+          python enhanced_license_headers.py --verbose --stats
           
           # Configure git
           git config --global user.name "SAGE OS Bot"
