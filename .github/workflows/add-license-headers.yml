@@ -2,7 +2,7 @@ name: Add License Headers
 
 on:
   push:
-    branches: [ main, develop, 'feature/**' ]
+    branches: [ main, develop, 'feature/**', origin ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:

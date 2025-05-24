@@ -1,12 +1,13 @@
-
 # SAGE OS 🌱🧠
+
 **Self-Aware General Environment**  
 An experimental, bare-metal operating system designed from scratch to learn, adapt, and evolve — starting on Raspberry Pi.
 
+> For detailed usage instructions, see [USAGE_GUIDE.md](./USAGE_GUIDE.md)
+
 ![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)
----
- 
-  ## 🔭 Vision 
+
+## 🔭 Vision 
 
 **SAGE OS** is not just another operating system. It is a living, evolving system designed to:
 
@@ -17,105 +18,45 @@ An experimental, bare-metal operating system designed from scratch to learn, ada
 
 This is an experiment at the intersection of **kernel engineering**, **embedded systems**, and **machine intelligence** — pushing the boundaries of what an operating system can become.
 
-<img src="https://github.com/user-attachments/assets/a5aeda94-147c-483f-8378-cca4ba023a13" width="600" height="500">
+## 🚀 Features
 
+- **Custom Bootloader**: Designed specifically for Raspberry Pi hardware
+- **Bare-Metal Kernel**: Written in C and ARM assembly for maximum performance
+- **AI Subsystem**: Integrated AI capabilities with the AI HAT+ accelerator
+- **Memory Management**: Efficient memory allocation and management
+- **Shell Interface**: Interactive command-line interface
+- **Hardware Abstraction**: Support for Raspberry Pi 3, 4, and 5
+- **Device Drivers**: UART, GPIO, I2C, SPI, and AI HAT+ drivers
+- **Multi-Architecture Support**: x86_64, aarch64, riscv64, arm
 
- 
-<details>
-  <summary>🎯 Objectives</summary>
+## 🧠 AI & Machine Learning Integration
 
-- Build a fully bootable, bare-metal operating system from scratch
-- Integrate basic AI/ML models to inform system-level decisions
-- Enable self-monitoring and self-optimization over time
-- Keep the codebase portable across architectures (starting with ARM/RPi)
-  
-<img src="https://github.com/user-attachments/assets/a726baa8-dca4-4097-ab31-54b8cd819287" width="600" height="700">
-
-  This image illustrates the **"Self-Evolving, AI-Driven OS Lifecycle"** — a conceptual flow for how your SAGE OS can autonomously detect hardware, build itself, and evolve across platforms.
-
----
-
-### 🔍 Step-by-Step Breakdown:
-
-1. **AI Detects Architecture and Hardware**
-
-   * On boot or install, SAGE OS's embedded AI analyzes the CPU type, memory, buses, I/O interfaces, and connected devices.
-
-2. **Generate Platform-Specific Kernel and Drivers**
-
-   * Based on the detected architecture (ARM, x86, RISC-V, etc.), the AI compiles or adapts the kernel and drivers tailored to the platform.
-
-3. **Build Disk Image or Container**
-
-   * The AI assembles a bootable `.img`, `.iso`, or container that includes the new kernel, drivers, and shell environment.
-
-4. **Boot Automatically**
-
-   * The new OS version is booted directly, either on the device or inside a VM/emulator (like QEMU) for testing.
-
-5. **Monitor Performance and Stability**
-
-   * AI continuously checks system behavior: uptime, crashes, latency, driver responses, etc.
-
-6. **Stable → Keep New Image**
-
-   * If everything runs well, the system promotes this version as the active build.
-
-7. **Unstable → Roll Back**
-
-   * If issues are found, the AI automatically rolls back to the previous known-good state.
-
- 
----
-
-This workflow allows **SAGE OS to evolve, rebuild, and test itself across any platform** — moving toward true autonomy and architectural universality.
- 
-
-
-</details>
-
-<details>
-  <summary>⚙️ Functional Goals</summary>
-
-- [x] Custom bootloader for Raspberry Pi
-- [x] Basic kernel with memory & process management
-- [ ] Custom command-line shell (SAGE Shell)
-- [ ] Integrated AI agent (TinyML / rule-based to start)
-- [ ] Self-tuning task scheduler and memory allocator
-- [ ] Support for minimal file system
-- [ ] Ability to evolve through version-aware updates
-
-</details>
-
-<details>
-  <summary>🧠 AI & Machine Learning Integration</summary>
-
-SAGE OS will include embedded, resource-efficient AI components that can:
-- Perform local inference (TinyML)
+SAGE OS includes embedded, resource-efficient AI components that can:
+- Perform local inference using the AI HAT+ with up to 26 TOPS
+- Support multiple model formats and precisions (FP32, FP16, INT8, INT4)
 - Observe usage and optimize scheduling
 - Trigger self-diagnostics and reconfiguration
+- Dynamically adjust power consumption based on workload
+- Monitor system health and performance
 - Eventually, enable modular regeneration of subsystems
 
-</details>
+The AI HAT+ provides hardware acceleration for neural networks with:
+- Up to 26 TOPS of neural processing power
+- 4GB of dedicated memory for AI models
+- Support for various model types (classification, detection, segmentation, generation)
+- Power-efficient operation with multiple power modes
+- Temperature monitoring and thermal management
+- High-speed data transfer using SPI and control via I2C
 
-<details>
-  <summary>🧰 Tech Stack</summary>
+## 🧰 Tech Stack
 
-- **Languages**: ARM Assembly, C (kernel), Python (tools & ML prototyping)
-- **Platform**: Raspberry Pi 4B (64-bit ARMv8)
-- **Toolchain**: `arm-none-eabi-gcc`, `QEMU`, `Make`, TinyML (TFLM, uTensor)
-- **Build Environment**: macOS M1 (cross-compilation)
+- **Languages**: ARM Assembly, C (kernel), Rust (core components), Python (tools & ML prototyping)
+- **Platform**: Raspberry Pi 4B/5 (64-bit ARMv8/ARMv9)
+- **Toolchain**: `aarch64-linux-gnu-gcc`, `rustc`, `QEMU`, `CMake`, TinyML (TFLM, uTensor)
+- **Build Environment**: Cross-compilation (Linux, macOS)
+- **AI Acceleration**: AI HAT+ with up to 26 TOPS neural processing
 
-</details>
-
-<details>
-  <summary>🔐 License</summary>
-
-This project is licensed under the [CC BY-NC 4.0 License](https://creativecommons.org/licenses/by-nc/4.0/).  
-You're free to use, modify, and share the code for non-commercial purposes with attribution.  
-All rights reserved to the original author.
-
-</details>
+## 📦 Project Structure
 
 <details>
   <summary>📦 Folder Structure</summary>
@@ -127,12 +68,46 @@ All rights reserved to the original author.
 
 </details>
 
+```
+SAGE-OS/
+├── boot/                  # Boot code
+│   └── boot.S             # ARM64 boot assembly
+├── kernel/                # Kernel components
+│   ├── kernel.c           # Kernel main entry point
+│   ├── memory.c           # Memory management
+│   ├── shell.c            # Interactive shell
+│   ├── stdio.c            # Standard I/O functions
+│   └── ai/                # AI subsystem
+│       └── ai_subsystem.c # AI subsystem implementation
+├── drivers/               # Hardware drivers
+│   ├── uart.c             # UART driver
+│   ├── i2c.c              # I2C driver
+│   ├── spi.c              # SPI driver
+│   └── ai_hat/            # AI HAT+ driver
+│       ├── ai_hat.c       # AI HAT+ implementation
+│       └── ai_hat.h       # AI HAT+ interface
+├── config.txt             # Raspberry Pi 3/4 configuration
+├── config_rpi5.txt        # Raspberry Pi 5 configuration
+├── linker.ld              # Linker script
+├── Makefile               # Build system
+└── run_qemu.sh            # QEMU runner script
+```
+
+## 🚀 Getting Started
+
 <details>
   <summary>🚀 Building and Running SAGE OS</summary>
 
-## Prerequisites
+### Prerequisites
 
 To build and run SAGE OS, you need the following tools:
+
+- Raspberry Pi 3, 4, or 5
+- SD card
+- USB-to-TTL serial cable
+- Cross-compilation toolchain (aarch64-linux-gnu-gcc)
+- Rust toolchain (for core components)
+- Optional: AI HAT+ for neural processing acceleration
 
 - GCC cross-compilers for your target architectures:
   - `x86_64-linux-gnu-gcc` for x86_64
@@ -154,9 +129,13 @@ sudo apt-get install gcc-x86-64-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linu
 
 # Install QEMU
 sudo apt-get install qemu-system-x86 qemu-system-arm qemu-system-misc
+
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup target add aarch64-unknown-none
 ```
 
-## Building SAGE OS
+### Building SAGE OS
 
 To build SAGE OS for a specific architecture:
 
@@ -167,11 +146,20 @@ make clean
 # Build for x86_64
 make ARCH=x86_64
 
-# Build for ARM64/AArch64
+# Build for ARM64/AArch64 (default)
 make ARCH=aarch64
 
 # Build for RISC-V 64-bit
 make ARCH=riscv64
+
+# Build for Raspberry Pi 4
+make
+
+# Build for Raspberry Pi 5
+make rpi5
+
+# Build for Raspberry Pi 5 with AI HAT+ support
+make rpi5_ai
 ```
 
 The build process creates:
@@ -179,9 +167,9 @@ The build process creates:
 - `kernel.elf` - The linked ELF executable
 - `kernel8.img` - The raw binary image
 
-## Running SAGE OS
+### Running SAGE OS
 
-### Using QEMU
+#### Using QEMU
 
 You can run SAGE OS in QEMU using the provided script:
 
@@ -194,24 +182,33 @@ You can run SAGE OS in QEMU using the provided script:
 
 # Run on RISC-V 64-bit
 ./scripts/test_emulated.sh riscv64
+
+# For Raspberry Pi 3/4
+./run_qemu.sh
+
+# For Raspberry Pi 5
+./run_qemu.sh -p rpi5
 ```
 
-### Running on Real Hardware
+#### Running on Real Hardware
 
 For Raspberry Pi (ARM64):
-1. Copy `kernel8.img` to the boot partition of your SD card
-2. Make sure `config.txt` contains `arm_64bit=1`
-3. Boot your Raspberry Pi
+1. Copy `kernel8.img` and the appropriate config file to an SD card:
+   - For Raspberry Pi 3/4: Use `config.txt`
+   - For Raspberry Pi 5: Use `config_rpi5.txt` (rename to `config.txt` on the SD card)
+2. Insert the SD card into your Raspberry Pi
+3. Connect a serial console
+4. Power on the Raspberry Pi
 
-## Development
+### Development
 
-### Adding New Features
+#### Adding New Features
 
 1. Add your source files to the appropriate directory
 2. Update the Makefile if necessary
 3. Build and test using the commands above
 
-### License Compliance
+#### License Compliance
 
 All source files must include the BSD 3-Clause License header. You can check for compliance using:
 
@@ -225,23 +222,37 @@ If you need to add license headers to new files:
 ./add_license_headers.py
 ```
 
-## Troubleshooting
+### Troubleshooting
 
-### Build Errors
+#### Build Errors
 
 - **Missing compiler**: Make sure you have installed the appropriate cross-compiler for your target architecture
 - **Linker errors**: Check that all required object files are being included in the link step
 
-### Runtime Errors
+#### Runtime Errors
 
 - **Kernel doesn't boot**: Verify that the boot code for your architecture is correctly implemented
 - **QEMU crashes**: Make sure you're using the correct QEMU parameters for your architecture
 
 </details>
 
+See [BUILD.md](BUILD.md) for detailed build instructions.
 
+### Shell Commands
 
-```md
+Once booted, SAGE OS provides a shell with the following commands:
+
+- `help` - Display available commands
+- `echo [text]` - Echo text to the console
+- `clear` - Clear the screen
+- `meminfo` - Display memory information
+- `reboot` - Reboot the system
+- `version` - Display OS version information
+- `ai info` - Display AI subsystem information (if enabled)
+- `ai temp` - Show AI HAT+ temperature (if available)
+- `ai power` - Show AI HAT+ power consumption (if available)
+- `ai models` - List loaded AI models (if any)
+
 ## 🧑‍💻 Contributing
 
 SAGE OS is open to contributions from developers, researchers, and hardware hackers.
@@ -252,7 +263,23 @@ SAGE OS is open to contributions from developers, researchers, and hardware hack
 - 🛠️ [How to Contribute](./CONTRIBUTING.md)
 
 By contributing, you agree to the above terms.
-## License
+
+## 🔍 Current Development Status
+
+- [x] Custom bootloader for Raspberry Pi
+- [x] Basic kernel with memory & process management
+- [x] Custom command-line shell (SAGE Shell)
+- [x] Memory management system
+- [x] UART driver for console I/O
+- [x] Raspberry Pi 5 support
+- [x] AI HAT+ driver for neural processing
+- [x] Multi-architecture build system
+- [ ] Self-tuning task scheduler
+- [ ] Support for minimal file system
+- [ ] Ability to evolve through version-aware updates
+- [ ] Full AI model loading and inference pipeline
+
+## 📝 License
 
 SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
 
@@ -260,5 +287,3 @@ You may use this project under the terms of the BSD 3-Clause License as stated i
 Alternatively, commercial use with extended rights is available — contact the author for commercial licensing.
 
 See the [LICENSE](./LICENSE) file for details.
-
-

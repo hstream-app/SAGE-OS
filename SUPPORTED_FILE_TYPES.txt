@@ -1,0 +1,87 @@
+─────────────────────────────────────────────────────────────────────────────
+SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+
+This file is part of the SAGE OS Project.
+─────────────────────────────────────────────────────────────────────────────
+Supported File Types and Comment Styles:
+==================================================
+
+ADA-STYLE:
+  Extensions: .ada, .adb, .ads
+  Comment format: Ada style comments
+
+BATCH-STYLE:
+  Extensions: .bat, .cmd
+  Comment format: Batch file comments
+
+C-STYLE:
+  Extensions: .c, .c++, .cc, .cpp, .css, .cxx, .h, .h++, .hh, .hpp, .hxx, .inl, .tcc
+  Comment format: C-style block comments
+
+CPP-STYLE:
+  Extensions: .S, .cjs, .cs, .csx, .d, .di, .fs, .fsx, .go, .gradle, .groovy, .java, .js, .json, .json5, .jsonc, .jsx, .kt, .kts, .less, .mjs, .mm, .php, .php3, .php4, .php5, .phps, .phtml, .proto, .rs, .sass, .scala, .scss, .styl, .swift, .ts, .tsx, .vb
+  Comment format: C++ style line comments
+
+ERLANG-STYLE:
+  Extensions: .erl, .hrl
+  Comment format: Erlang style comments
+
+FORTRAN-STYLE:
+  Extensions: .f, .f03, .f08, .f77, .f90, .f95, .for, .ftn
+  Comment format: Fortran style comments
+
+HASH-STYLE:
+  Extensions: .R, .ac, .am, .ansible, .asm, .awk, .bash, .cbl, .cfg, .cmake, .cob, .conf, .config, .cpy, .csh, .dockerfile, .env, .ex, .expect, .exs, .fish, .gemspec, .gql, .graphql, .handlebars, .hbs, .in, .ini, .j2, .jinja, .k8s, .ksh, .m4, .make, .mk, .mustache, .nasm, .ninja, .pl, .pm, .pod, .properties, .psgi, .pxd, .pxi, .py, .py3, .pyi, .pyw, .pyx, .r, .rake, .rb, .rbw, .rmd, .rnw, .rst, .ru, .s, .scons, .sed, .sh, .t, .tcl, .tcsh, .tf, .tfvars, .tk, .toml, .waf, .yaml, .yml, .zsh
+  Comment format: Hash style comments
+
+HASKELL-STYLE:
+  Extensions: .hs, .lhs
+  Comment format: Haskell style comments
+
+HTML-STYLE:
+  Extensions: .htm, .html, .svelte, .svg, .vue, .xaml, .xhtml, .xml, .xsl, .xslt
+  Comment format: HTML/XML style comments
+
+LATEX-STYLE:
+  Extensions: .cls, .dtx, .ins, .latex, .sty, .tex
+  Comment format: LaTeX style comments
+
+LISP-STYLE:
+  Extensions: .cl, .el, .lisp, .lsp, .rkt, .scm, .ss
+  Comment format: Lisp style comments
+
+LUA-STYLE:
+  Extensions: .lua
+  Comment format: Lua style comments
+
+MARKDOWN-STYLE:
+  Extensions: .markdown, .md, .mdown, .mkd
+  Comment format: Markdown style comments
+
+MATLAB-STYLE:
+  Extensions: .fig, .m, .mat
+  Comment format: MATLAB style comments
+
+PASCAL-STYLE:
+  Extensions: .inc, .pas, .pp
+  Comment format: Pascal style comments
+
+POWERSHELL-STYLE:
+  Extensions: .ps1, .psd1, .psm1
+  Comment format: PowerShell style comments
+
+SQL-STYLE:
+  Extensions: .mysql, .pgsql, .plsql, .sql, .tsql
+  Comment format: SQL style comments
+
+TEXT-STYLE:
+  Extensions: .rtf, .text, .txt
+  Comment format: Plain text style
+
+VIM-STYLE:
+  Extensions: .vim, .vimrc
+  Comment format: Vim script comments
+
+Special files: .babelrc, .clang-format, .clang-tidy, .dockerignore, .editorconfig, .eslintrc, .gitattributes, .gitignore, .prettierrc, Brewfile, CMakeLists.txt, Dockerfile, GNUmakefile, Gemfile, Jenkinsfile, Makefile, Podfile, Procfile, Rakefile, Vagrantfile, makefile

@@ -1,0 +1,53 @@
+─────────────────────────────────────────────────────────────────────────────
+SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+
+This file is part of the SAGE OS Project.
+─────────────────────────────────────────────────────────────────────────────
+# SAGE OS Configuration for Raspberry Pi 5
+# This file should be renamed to config.txt on the SD card
+
+# Enable 64-bit mode
+arm_64bit=1
+
+# Set CPU clock speed (in MHz)
+arm_freq=2400
+
+# Set GPU memory (in MB)
+gpu_mem=128
+
+# Disable rainbow splash screen
+disable_splash=1
+
+# Boot delay (in seconds)
+boot_delay=0
+
+# UART settings for console
+enable_uart=1
+uart_2ndstage=1
+
+# Kernel filename
+kernel=kernel8.img
+
+# Device tree settings
+device_tree_address=0x03000000
+device_tree_end=0x03100000
+
+# Enable I2C and SPI for AI HAT+
+dtparam=i2c_arm=on
+dtparam=spi=on
+
+# Set I2C and SPI clock speeds
+dtparam=i2c_arm_baudrate=400000
+dtparam=spi_clk_freq=20000000
+
+# Disable Bluetooth to free up UART
+dtoverlay=disable-bt
+
+# Enable hardware-accelerated graphics
+dtoverlay=vc4-kms-v3d
+
+# Set display resolution (if HDMI is connected)
+# hdmi_group=2
+# hdmi_mode=82  # 1080p 60Hz

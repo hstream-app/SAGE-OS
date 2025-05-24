@@ -1,3 +1,12 @@
+<!--
+─────────────────────────────────────────────────────────────────────────────
+SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+
+This file is part of the SAGE OS Project.
+─────────────────────────────────────────────────────────────────────────────
+-->
 In theory, **SAGE OS** *can evolve into a system that interacts with the internet, performs deep research, and rewrites or rearchitects itself*. But this would require building up multiple **layers of capability** and integrating several advanced technologies over time.
 
 Let’s break this down by stages — from where we are now to our visionary goal.

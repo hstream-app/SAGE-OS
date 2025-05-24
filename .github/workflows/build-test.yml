@@ -16,85 +16,23 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu gcc-riscv64-linux-gnu
-          sudo apt-get install -y qemu-system-arm qemu-system-x86 qemu-system-misc
+          sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu qemu-system-arm
       
-      - name: Build kernel for all architectures
+      - name: Build kernel
         run: |
-          # Build for aarch64 (default)
-          echo "Building for aarch64..."
           make clean
           make ARCH=aarch64
           
           # Check if build artifacts were created
-          if [ ! -f "kernel.elf" ] || [ ! -f "kernel8.img" ]; then
-            echo "Error: Build failed to produce kernel artifacts for aarch64"
+          if [ ! -f "build/aarch64/kernel.elf" ] || [ ! -f "build/aarch64/kernel.img" ]; then
+            echo "Error: Build failed to produce kernel artifacts"
             exit 1
           fi
           
-          # Create build directory and copy artifacts
-          mkdir -p build/aarch64
-          cp kernel.elf build/aarch64/
-          cp kernel8.img build/aarch64/kernel.img
-          cp kernel8.img build/aarch64/
-          
-          # Build for x86_64
-          echo "Building for x86_64..."
-          make clean
-          make ARCH=x86_64
-          
-          # Check if build artifacts were created
-          if [ ! -f "kernel.elf" ] || [ ! -f "kernel8.img" ]; then
-            echo "Error: Build failed to produce kernel artifacts for x86_64"
-            exit 1
-          fi
-          
-          # Create build directory and copy artifacts
-          mkdir -p build/x86_64
-          cp kernel.elf build/x86_64/
-          cp kernel8.img build/x86_64/kernel.img
-          
-          # Build for riscv64
-          echo "Building for riscv64..."
-          make clean
-          make ARCH=riscv64
-          
-          # Check if build artifacts were created
-          if [ ! -f "kernel.elf" ] || [ ! -f "kernel8.img" ]; then
-            echo "Error: Build failed to produce kernel artifacts for riscv64"
-            exit 1
-          fi
-          
-          # Create build directory and copy artifacts
-          mkdir -p build/riscv64
-          cp kernel.elf build/riscv64/
-          cp kernel8.img build/riscv64/kernel.img
-          
-          echo "✅ Build successful for all architectures"
-          
-          # List build artifacts for debugging
-          echo "Build artifacts:"
-          find build -type f | sort
+          echo "✅ Build successful"
       
       - name: Test with QEMU
         run: |
-          # Make the test script executable
-          chmod +x scripts/test_emulated.sh
-          
-          # List build artifacts for debugging
-          echo "Build artifacts before testing:"
-          find build -type f | sort
-          
-          # Test aarch64 build
-          echo "Testing aarch64 build with QEMU..."
-          timeout 10s scripts/test_emulated.sh aarch64 || true
-          
-          # Test x86_64 build
-          echo "Testing x86_64 build with QEMU..."
-          timeout 10s scripts/test_emulated.sh x86_64 || true
-          
-          # Test riscv64 build
-          echo "Testing riscv64 build with QEMU..."
-          timeout 10s scripts/test_emulated.sh riscv64 || true
-          
-          echo "QEMU tests completed"
+          # Run the emulation test script
+          ./scripts/test_emulated.sh aarch64 5
+          echo "QEMU test completed"

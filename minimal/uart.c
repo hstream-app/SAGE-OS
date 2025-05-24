@@ -1,86 +1,103 @@
-/*
- * BSD 3-Clause License
- *
- * Copyright (c) 2025, Ashish Vasant Yesale
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 #include "uart.h"
 
-// Base address for the UART0 peripheral (BCM2835/BCM2836/BCM2837)
-#define UART0_BASE 0x3F201000
+// Memory-Mapped I/O addresses for Raspberry Pi
+#define MMIO_BASE       0x3F000000  // For Raspberry Pi 3/4
+// #define MMIO_BASE     0xFE000000  // For Raspberry Pi 5
 
 // UART registers
-#define UART0_DR     (UART0_BASE + 0x00) // Data Register
-#define UART0_FR     (UART0_BASE + 0x18) // Flag Register
-#define UART0_IBRD   (UART0_BASE + 0x24) // Integer Baud Rate Divisor
-#define UART0_FBRD   (UART0_BASE + 0x28) // Fractional Baud Rate Divisor
-#define UART0_LCRH   (UART0_BASE + 0x2C) // Line Control Register
-#define UART0_CR     (UART0_BASE + 0x30) // Control Register
-#define UART0_IMSC   (UART0_BASE + 0x38) // Interrupt Mask Set Clear Register
+#define UART0_DR        ((volatile unsigned int*)(MMIO_BASE + 0x00201000))
+#define UART0_FR        ((volatile unsigned int*)(MMIO_BASE + 0x00201018))
+#define UART0_IBRD      ((volatile unsigned int*)(MMIO_BASE + 0x00201024))
+#define UART0_FBRD      ((volatile unsigned int*)(MMIO_BASE + 0x00201028))
+#define UART0_LCRH      ((volatile unsigned int*)(MMIO_BASE + 0x0020102C))
+#define UART0_CR        ((volatile unsigned int*)(MMIO_BASE + 0x00201030))
+#define UART0_IMSC      ((volatile unsigned int*)(MMIO_BASE + 0x00201038))
+#define UART0_ICR       ((volatile unsigned int*)(MMIO_BASE + 0x00201044))
 
-// Flag Register bits
-#define FR_RXFE      0x10 // Receive FIFO empty
-#define FR_TXFF      0x20 // Transmit FIFO full
+// GPIO registers
+#define GPFSEL1         ((volatile unsigned int*)(MMIO_BASE + 0x00200004))
+#define GPPUD           ((volatile unsigned int*)(MMIO_BASE + 0x00200094))
+#define GPPUDCLK0       ((volatile unsigned int*)(MMIO_BASE + 0x00200098))
 
-void minimal_uart_init(void) {
-    // Simplified UART initialization for minimal boot environment
-    // Disable UART
-    *(volatile unsigned int*)(UART0_CR) = 0;
+// Initialize UART
+void uart_init() {
+    // Disable UART0
+    *UART0_CR = 0;
+
+    // Setup GPIO pins 14 and 15
+    unsigned int selector = *GPFSEL1;
+    selector &= ~((7 << 12) | (7 << 15)); // Clear bits 12-14 (GPIO14) and 15-17 (GPIO15)
+    selector |= (4 << 12) | (4 << 15);    // Set bits 12-14 (GPIO14) and 15-17 (GPIO15) to alternative function 0 (UART)
+    *GPFSEL1 = selector;
+
+    // Disable pull-up/down
+    *GPPUD = 0;
     
-    // Set baud rate - 115200 at 48MHz clock
-    *(volatile unsigned int*)(UART0_IBRD) = 26;
-    *(volatile unsigned int*)(UART0_FBRD) = 3;
+    // Wait 150 cycles
+    for (volatile int i = 0; i < 150; i++) { }
     
-    // 8 bits, no parity, 1 stop bit
-    *(volatile unsigned int*)(UART0_LCRH) = 0x70;
+    // Clock the control signal into the GPIO pads
+    *GPPUDCLK0 = (1 << 14) | (1 << 15);
     
-    // Enable UART, transmit and receive
-    *(volatile unsigned int*)(UART0_CR) = 0x301;
+    // Wait 150 cycles
+    for (volatile int i = 0; i < 150; i++) { }
+    
+    // Remove the clock
+    *GPPUDCLK0 = 0;
+
+    // Clear interrupts
+    *UART0_ICR = 0x7FF;
+
+    // Set baud rate to 115200
+    // Baud rate divisor = UART clock / (16 * baud rate)
+    // UART clock = 48MHz, baud rate = 115200
+    // Divisor = 48000000 / (16 * 115200) = 26.0416...
+    // Integer part = 26
+    // Fractional part = 0.0416... * 64 = 2.66... ~ 3
+    *UART0_IBRD = 26;
+    *UART0_FBRD = 3;
+
+    // Enable FIFO, 8-bit data, 1 stop bit, no parity
+    *UART0_LCRH = (1 << 4) | (1 << 5) | (1 << 6);
+
+    // Enable UART0, receive and transmit
+    *UART0_CR = (1 << 0) | (1 << 8) | (1 << 9);
 }
 
-void minimal_uart_putc(char c) {
+// Send a character
+void uart_putc(unsigned char c) {
     // Wait until transmit FIFO is not full
-    while (*(volatile unsigned int*)(UART0_FR) & FR_TXFF);
+    while (*UART0_FR & (1 << 5)) { }
     
-    // Write character to data register
-    *(volatile unsigned int*)(UART0_DR) = c;
+    // Write the character to the data register
+    *UART0_DR = c;
+    
+    // If it's a newline, also send a carriage return
+    if (c == '\n') {
+        uart_putc('\r');
+    }
 }
 
-char minimal_uart_getc(void) {
+// Receive a character
+unsigned char uart_getc() {
     // Wait until receive FIFO is not empty
-    while (*(volatile unsigned int*)(UART0_FR) & FR_RXFE);
+    while (*UART0_FR & (1 << 4)) { }
     
-    // Read character from data register
-    return *(volatile unsigned int*)(UART0_DR);
+    // Read the character from the data register
+    return *UART0_DR;
 }
 
-void minimal_uart_puts(const char* str) {
+// Send a string
+void uart_puts(const char* str) {
     while (*str) {
-        minimal_uart_putc(*str++);
+        uart_putc(*str++);
     }
 }

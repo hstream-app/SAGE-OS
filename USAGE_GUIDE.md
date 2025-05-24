@@ -4,248 +4,315 @@ This guide provides detailed instructions on how to build, run, test, and deploy
 
 ## Table of Contents
 
-1. [Prerequisites](#prerequisites)
-2. [Building SAGE OS](#building-sage-os)
-3. [Running SAGE OS](#running-sage-os)
-4. [Testing SAGE OS](#testing-sage-os)
-5. [Deploying SAGE OS](#deploying-sage-os)
-6. [Troubleshooting](#troubleshooting)
-7. [Development Workflow](#development-workflow)
+- [Prerequisites](#prerequisites)
+- [Supported Architectures](#supported-architectures)
+- [Building SAGE OS](#building-sage-os)
+  - [Building for x86_64](#building-for-x86_64)
+  - [Building for ARM64/AArch64](#building-for-arm64aarch64)
+  - [Building for RISC-V](#building-for-risc-v)
+  - [Building for Raspberry Pi](#building-for-raspberry-pi)
+- [Running SAGE OS](#running-sage-os)
+  - [Running in QEMU](#running-in-qemu)
+  - [Running on Real Hardware](#running-on-real-hardware)
+- [Testing SAGE OS](#testing-sage-os)
+  - [Automated Tests](#automated-tests)
+  - [Manual Testing](#manual-testing)
+- [Debugging SAGE OS](#debugging-sage-os)
+  - [Using GDB](#using-gdb)
+  - [Using QEMU Debug Features](#using-qemu-debug-features)
+- [Deploying SAGE OS](#deploying-sage-os)
+  - [Creating Bootable Media](#creating-bootable-media)
+  - [Network Boot](#network-boot)
+- [Contributing to SAGE OS](#contributing-to-sage-os)
+  - [Code Style](#code-style)
+  - [Pull Request Process](#pull-request-process)
+- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
-### Required Tools
+To build and run SAGE OS, you'll need the following tools and dependencies:
 
-To work with SAGE OS, you need the following tools:
+### Common Requirements
 
-#### Cross-Compilers
+- **Git**: For version control
+- **Make**: For build automation
+- **QEMU**: For emulation (version 6.0 or higher recommended)
+- **GCC**: For compilation
+- **Binutils**: For binary utilities
+- **Python 3**: For build scripts
 
-- **x86_64**: `x86_64-linux-gnu-gcc`
-- **ARM64/AArch64**: `aarch64-linux-gnu-gcc`
-- **RISC-V 64-bit**: `riscv64-linux-gnu-gcc`
+### Architecture-Specific Requirements
 
-#### Emulation Tools
-
-- **QEMU** for emulating different architectures:
-  - `qemu-system-x86_64`
-  - `qemu-system-aarch64`
-  - `qemu-system-riscv64`
-
-#### Development Tools
-
-- **Git** for version control
-- **Make** for build automation
-- **Python 3** for utility scripts
-
-### Installation Instructions
-
-#### Debian/Ubuntu
+#### For x86_64
 
 ```bash
-# Install cross-compilers
-sudo apt-get update
-sudo apt-get install -y gcc-x86-64-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
-
-# Install QEMU
-sudo apt-get install -y qemu-system-x86 qemu-system-arm qemu-system-misc
-
-# Install development tools
-sudo apt-get install -y git make python3 python3-pip
+sudo apt-get install gcc binutils-x86-64-linux-gnu qemu-system-x86
 ```
 
-#### macOS
+#### For ARM64/AArch64
 
 ```bash
-# Install Homebrew if not already installed
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install QEMU
-brew install qemu
-
-# Install cross-compilers via Homebrew
-brew tap messense/macos-cross-toolchains
-brew install x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu riscv64-unknown-linux-gnu
-
-# Install development tools
-brew install git make python3
+sudo apt-get install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu qemu-system-aarch64
 ```
+
+#### For RISC-V
+
+```bash
+sudo apt-get install gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu qemu-system-riscv64
+```
+
+#### For Raspberry Pi
+
+```bash
+sudo apt-get install gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+```
+
+## Supported Architectures
+
+SAGE OS currently supports the following architectures:
+
+- **x86_64**: 64-bit x86 architecture
+- **ARM64/AArch64**: 64-bit ARM architecture
+- **RISC-V (riscv64)**: 64-bit RISC-V architecture
+- **Raspberry Pi**: Various Raspberry Pi models (ARM-based)
 
 ## Building SAGE OS
 
-### Getting the Source Code
+### Building for x86_64
 
-```bash
-# Clone the repository
-git clone https://github.com/AshishYesale7/SAGE-OS.git
-cd SAGE-OS
-```
-
-### Building for Different Architectures
-
-SAGE OS supports multiple architectures. Use the `ARCH` parameter to specify the target architecture.
-
-#### Clean Previous Build Artifacts
-
-```bash
-make clean
-```
-
-#### Build for x86_64
+To build SAGE OS for x86_64 architecture:
 
 ```bash
 make ARCH=x86_64
 ```
 
-#### Build for ARM64/AArch64
+The compiled kernel will be available at `build/x86_64/kernel.bin`.
+
+### Building for ARM64/AArch64
+
+To build SAGE OS for ARM64/AArch64 architecture:
+
+```bash
+make ARCH=arm64
+```
+
+or
 
 ```bash
 make ARCH=aarch64
 ```
 
-#### Build for RISC-V 64-bit
+The compiled kernel will be available at `build/arm64/kernel.bin`.
+
+### Building for RISC-V
+
+To build SAGE OS for RISC-V architecture:
 
 ```bash
 make ARCH=riscv64
 ```
 
-### Build Artifacts
+The compiled kernel will be available at `build/riscv64/kernel.bin`.
 
-After a successful build, you'll find the following files:
+### Building for Raspberry Pi
 
-- **Object files**: `.o` files for each source file
-- **ELF executable**: `kernel.elf`
-- **Raw binary image**: `kernel8.img` (for ARM64/AArch64)
+To build SAGE OS for Raspberry Pi:
+
+```bash
+make ARCH=raspi
+```
+
+The compiled kernel will be available at `build/raspi/kernel.img`.
+
+### Building All Architectures
+
+To build SAGE OS for all supported architectures:
+
+```bash
+make all-arch
+```
+
+### Cleaning Build Files
+
+To clean build files for a specific architecture:
+
+```bash
+make clean ARCH=x86_64
+```
+
+To clean all build files:
+
+```bash
+make clean-all
+```
 
 ## Running SAGE OS
 
-### Using QEMU Emulation
+### Running in QEMU
 
-SAGE OS can be run in QEMU for testing and development.
-
-#### Running on x86_64
+#### Running x86_64 Build
 
 ```bash
-qemu-system-x86_64 -kernel kernel.elf -m 256 -serial stdio
+make run ARCH=x86_64
 ```
 
-#### Running on ARM64/AArch64
+or manually:
 
 ```bash
-qemu-system-aarch64 -machine virt -cpu cortex-a53 -kernel kernel8.img -m 256 -serial stdio
+qemu-system-x86_64 -kernel build/x86_64/kernel.bin -serial stdio -m 512M
 ```
 
-#### Running on RISC-V 64-bit
+#### Running ARM64/AArch64 Build
 
 ```bash
-qemu-system-riscv64 -machine virt -kernel kernel.elf -m 256 -serial stdio
+make run ARCH=arm64
 ```
 
-### Using Convenience Scripts
-
-The repository includes scripts to simplify running SAGE OS in QEMU:
+or manually:
 
 ```bash
-# Run on x86_64
-./scripts/test_emulated.sh x86_64
+qemu-system-aarch64 -machine virt -cpu cortex-a57 -kernel build/arm64/kernel.bin -serial stdio -m 512M
+```
 
-# Run on ARM64/AArch64
-./scripts/test_emulated.sh aarch64
+#### Running RISC-V Build
 
-# Run on RISC-V 64-bit
-./scripts/test_emulated.sh riscv64
+```bash
+make run ARCH=riscv64
+```
+
+or manually:
+
+```bash
+qemu-system-riscv64 -machine virt -kernel build/riscv64/kernel.bin -serial stdio -m 512M
 ```
 
 ### Running on Real Hardware
 
-#### Raspberry Pi (ARM64)
+#### Running on x86_64 Hardware
 
-1. Build SAGE OS for ARM64:
+1. Create a bootable USB drive:
    ```bash
-   make ARCH=aarch64
+   make bootable-usb ARCH=x86_64 DEVICE=/dev/sdX
    ```
+   Replace `/dev/sdX` with your USB device path.
 
-2. Copy the kernel image to your SD card:
+2. Boot from the USB drive on your target machine.
+
+#### Running on Raspberry Pi
+
+1. Copy the kernel image to an SD card with Raspberry Pi OS:
    ```bash
-   cp kernel8.img /path/to/sd/card/boot/
+   cp build/raspi/kernel.img /path/to/sd/card/
    ```
 
-3. Ensure your `config.txt` on the SD card contains:
-   ```
-   arm_64bit=1
-   kernel=kernel8.img
-   ```
-
-4. Insert the SD card into your Raspberry Pi and power it on.
+2. Insert the SD card into your Raspberry Pi and power it on.
 
 ## Testing SAGE OS
 
 ### Automated Tests
 
-SAGE OS includes automated tests to verify functionality:
+SAGE OS includes automated tests to verify functionality. To run the tests:
 
 ```bash
-# Run all tests
 make test
+```
 
-# Run architecture-specific tests
+To run tests for a specific architecture:
+
+```bash
 make test ARCH=x86_64
-make test ARCH=aarch64
-make test ARCH=riscv64
 ```
 
 ### Manual Testing
 
-For manual testing, you can use QEMU with debugging enabled:
+For manual testing, you can use the QEMU emulator with the debug console:
 
 ```bash
-# Debug on x86_64
-qemu-system-x86_64 -kernel kernel.elf -m 256 -serial stdio -s -S
+make run-debug ARCH=x86_64
 ```
 
-Then connect with GDB:
+This will start QEMU with the kernel and enable the debug console, allowing you to interact with the system.
+
+## Debugging SAGE OS
+
+### Using GDB
+
+To debug SAGE OS with GDB:
 
 ```bash
-gdb kernel.elf -ex "target remote localhost:1234"
+make debug ARCH=x86_64
 ```
 
-### Continuous Integration
+This will start QEMU in debug mode and wait for a GDB connection. In another terminal, run:
 
-SAGE OS uses GitHub Actions for continuous integration. The workflows check:
+```bash
+gdb
+(gdb) target remote localhost:1234
+(gdb) file build/x86_64/kernel.elf
+(gdb) break kernel_main
+(gdb) continue
+```
 
-1. **Build Test**: Verifies that SAGE OS builds successfully for all supported architectures
-2. **License Headers**: Ensures all source files have proper license headers
-3. **Code Quality**: Checks code style and quality
-4. **Project Structure**: Validates the project structure
+### Using QEMU Debug Features
+
+QEMU provides various debug features that can be useful:
+
+```bash
+qemu-system-x86_64 -kernel build/x86_64/kernel.bin -serial stdio -d int,cpu_reset -D qemu.log
+```
+
+This will log interrupts and CPU resets to `qemu.log`.
 
 ## Deploying SAGE OS
 
-### Creating Release Images
+### Creating Bootable Media
 
-To create release images for distribution:
+#### Creating a Bootable USB Drive
 
 ```bash
-# Create release images for all architectures
-make release
-
-# Create release image for a specific architecture
-make release ARCH=aarch64
+make bootable-usb ARCH=x86_64 DEVICE=/dev/sdX
 ```
 
-This creates compressed images in the `release/` directory.
+Replace `/dev/sdX` with your USB device path.
 
-### Deploying to Raspberry Pi
+#### Creating a Bootable ISO
 
-1. Download the latest release image for ARM64/AArch64
-2. Extract the image:
+```bash
+make iso ARCH=x86_64
+```
+
+This will create an ISO file at `build/x86_64/sage-os.iso`.
+
+### Network Boot
+
+SAGE OS supports network booting via PXE. To set up a PXE server:
+
+1. Copy the kernel to your TFTP server:
    ```bash
-   unzip sage-os-aarch64.zip
+   cp build/x86_64/kernel.bin /var/lib/tftpboot/
    ```
-3. Write the image to your SD card:
-   ```bash
-   dd if=sage-os-aarch64.img of=/dev/sdX bs=4M status=progress
-   ```
-   Replace `/dev/sdX` with your SD card device.
-4. Insert the SD card into your Raspberry Pi and power it on.
+
+2. Configure your DHCP server to point to the TFTP server and the kernel file.
+
+## Contributing to SAGE OS
+
+### Code Style
+
+SAGE OS follows a specific code style:
+
+- Use 4 spaces for indentation (no tabs)
+- Maximum line length of 100 characters
+- Use camelCase for function names and variables
+- Use PascalCase for struct and enum names
+- Add license headers to all source files
+
+### Pull Request Process
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests to ensure functionality
+5. Submit a pull request
 
 ## Troubleshooting
 
@@ -253,85 +320,28 @@ This creates compressed images in the `release/` directory.
 
 #### Missing Compiler
 
-Error: `aarch64-linux-gnu-gcc: command not found`
+If you encounter errors about missing compilers, ensure you have installed the appropriate cross-compiler for your target architecture.
 
-Solution: Install the required cross-compiler:
-```bash
-sudo apt-get install gcc-aarch64-linux-gnu
-```
+#### QEMU Not Found
 
-#### Linker Errors
+If QEMU commands fail, make sure QEMU is installed for the appropriate architecture.
 
-Error: `undefined reference to...`
+#### Build Fails with Syntax Errors
 
-Solution: Check that all required object files are included in the link step. Verify that you're using the correct architecture-specific code.
+Ensure you're using a compatible version of GCC for the target architecture.
 
-### Runtime Issues
+### Common Runtime Issues
 
-#### Kernel Doesn't Boot
+#### Kernel Panic on Boot
 
-1. Verify that the boot code for your architecture is correctly implemented
-2. Check that you're using the correct QEMU parameters
-3. Ensure the kernel image is properly formatted for your target architecture
+This could be due to incompatible hardware or incorrect boot parameters. Try running in QEMU first to verify the kernel works.
 
-#### QEMU Crashes
+#### No Serial Output
 
-1. Update QEMU to the latest version
-2. Increase the memory allocation (`-m` parameter)
-3. Check for architecture-specific issues in your code
-
-## Development Workflow
-
-### Adding New Features
-
-1. Create a new branch:
-   ```bash
-   git checkout -b feature/my-new-feature
-   ```
-
-2. Implement your changes, ensuring:
-   - All source files have proper license headers
-   - Code follows the project's style guidelines
-   - Architecture-specific code is properly isolated
-
-3. Build and test your changes:
-   ```bash
-   make clean
-   make ARCH=x86_64
-   make ARCH=aarch64
-   make ARCH=riscv64
-   ```
-
-4. Commit your changes:
-   ```bash
-   git add .
-   git commit -m "Add my new feature"
-   ```
-
-5. Push your changes and create a pull request:
-   ```bash
-   git push origin feature/my-new-feature
-   ```
-
-### License Compliance
-
-All source files must include the BSD 3-Clause License header. You can check for compliance using:
-
-```bash
-./license-checker.py
-```
-
-If you need to add license headers to new files:
-
-```bash
-./add_license_headers.py
-```
+Check that your serial connection is properly configured. For QEMU, ensure you're using the `-serial stdio` option.
 
 ---
 
-## Additional Resources
+For additional help or to report issues, please open an issue on the GitHub repository.
 
-- [SAGE OS GitHub Repository](https://github.com/AshishYesale7/SAGE-OS)
-- [BSD 3-Clause License](https://opensource.org/licenses/BSD-3-Clause)
-- [QEMU Documentation](https://www.qemu.org/docs/master/)
-- [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/)
+© 2025 SAGE OS Project. All rights reserved.

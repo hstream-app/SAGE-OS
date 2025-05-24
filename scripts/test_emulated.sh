@@ -1,44 +1,36 @@
 #!/bin/bash
-# BSD 3-Clause License
-#
-# Copyright (c) 2023, SAGE OS Project
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-#
-# 3. Neither the name of the copyright holder nor the names of its
-#    contributors may be used to endorse or promote products derived from
-#    this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# ─────────────────────────────────────────────────────────────────────────────
+# SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+# SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+# SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+# 
+# This file is part of the SAGE OS Project.
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Test script for emulating SAGE OS on different architectures
+# Test SAGE OS in QEMU emulator
+# Usage: ./scripts/test_emulated.sh [architecture] [timeout]
 
-set -e
+# Default architecture is aarch64
+ARCH=${1:-aarch64}
+# Default timeout is 10 seconds
+TIMEOUT=${2:-10}
 
-ARCH=$1
-TIMEOUT=30
+# Validate architecture
+case $ARCH in
+    x86_64|arm64|aarch64|riscv64)
+        echo "Testing on $ARCH architecture"
+        ;;
+    *)
+        echo "Error: Unsupported architecture: $ARCH"
+        echo "Supported architectures: x86_64, arm64, aarch64, riscv64"
+        exit 1
+        ;;
+esac
 
-if [ -z "$ARCH" ]; then
-    echo "Usage: $0 <architecture>"
-    echo "Supported architectures: x86_64, arm64, aarch64, riscv64"
+# Check if build directory exists
+if [ ! -d "build/$ARCH" ]; then
+    echo "Error: Build directory not found at build/$ARCH"
+    echo "Please run 'make ARCH=$ARCH' first"
     exit 1
 fi
 
@@ -83,5 +75,5 @@ esac
 echo "Running: $QEMU_CMD"
 timeout $TIMEOUT $QEMU_CMD || true
 
-echo "Test completed for $ARCH"
+echo "Test completed for $ARCH architecture"
 exit 0
