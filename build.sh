@@ -183,6 +183,38 @@ check_dependencies() {
     return 0
 }
 
+# Check dependencies silently (no output)
+check_deps_silent() {
+    local missing_deps=()
+    
+    # Check for make
+    if ! command_exists make; then
+        missing_deps+=("make")
+    fi
+    
+    # Check for QEMU
+    if ! command_exists qemu-system-aarch64; then
+        missing_deps+=("qemu-system-aarch64")
+    fi
+    
+    # Check for cross-compilers based on host OS
+    if [ "$HOST_OS" = "macos" ]; then
+        if ! command_exists aarch64-unknown-linux-gnu-gcc; then
+            missing_deps+=("aarch64-unknown-linux-gnu-gcc")
+        fi
+    else
+        if ! command_exists aarch64-linux-gnu-gcc; then
+            missing_deps+=("aarch64-linux-gnu-gcc")
+        fi
+    fi
+    
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        return 1
+    fi
+    
+    return 0
+}
+
 # Validate architecture
 validate_arch() {
     local arch=$1
@@ -466,9 +498,6 @@ EOF
 main() {
     cd "$SCRIPT_DIR"
     
-    # Detect host OS
-    detect_host_os
-    
     # Parse command line arguments
     case "${1:-help}" in
         install-deps)
@@ -554,6 +583,9 @@ main() {
             ;;
     esac
 }
+
+# Detect host OS before running main function
+detect_host_os
 
 # Run main function with all arguments
 main "$@"
