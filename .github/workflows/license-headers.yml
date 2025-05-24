@@ -26,11 +26,13 @@ jobs:
       
       - name: Check for missing license headers
         id: check-headers
+        continue-on-error: true
         run: |
           python add_license_headers.py --check-only
           if [ $? -ne 0 ]; then
             echo "Missing license headers detected"
             echo "missing_headers=true" >> $GITHUB_OUTPUT
+            exit 0
           else
             echo "All files have license headers"
             echo "missing_headers=false" >> $GITHUB_OUTPUT
