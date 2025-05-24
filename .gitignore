@@ -3,10 +3,14 @@
 /bin/
 /obj/
 *.o
-*.elf
 *.bin
-*.img
 *.map
+
+# Exclude build artifacts except in build-output directory
+*.elf
+*.img
+!build-output/*.elf
+!build-output/*.img
 
 # Compiled source
 *.out
