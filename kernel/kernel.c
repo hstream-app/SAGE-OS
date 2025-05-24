@@ -6,11 +6,12 @@
  * This file is part of the SAGE OS Project.
  * ───────────────────────────────────────────────────────────────────────────── */
 #include "kernel.h"
-#include "uart.h"
+#include "../drivers/uart.h"
 #include "memory.h"
 #include "shell.h"
 #include "types.h"
 #include "stdio.h"
+#include "utils.h"
 
 // Static buffer for version string
 static char version_str[32];
@@ -48,7 +49,16 @@ void kernel_panic(const char* message) {
     
     // Halt the CPU
     while (1) {
+#if defined(__aarch64__) || defined(__arm__)
         asm volatile("wfe");
+#elif defined(__x86_64__)
+        asm volatile("hlt");
+#elif defined(__riscv)
+        asm volatile("wfi");
+#else
+        // Generic busy wait for unsupported architectures
+        for (volatile int i = 0; i < 1000000; i++);
+#endif
     }
 }
 

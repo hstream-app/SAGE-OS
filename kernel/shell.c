@@ -6,9 +6,10 @@
  * This file is part of the SAGE OS Project.
  * ───────────────────────────────────────────────────────────────────────────── */
 #include "shell.h"
-#include "uart.h"
+#include "../drivers/uart.h"
 #include "memory.h"
 #include "types.h"
+#include "stdio.h"
 #include "ai/ai_subsystem.h"
 
 #define MAX_COMMAND_LENGTH 256

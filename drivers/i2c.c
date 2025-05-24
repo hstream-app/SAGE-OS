@@ -1,13 +1,13 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ * ───────────────────────────────────────────────────────────────────────────── */
 #include "i2c.h"
 #include "uart.h"
+#include <stdbool.h>
 
 // Raspberry Pi 5 I2C registers
 #define RPI5_PERIPHERAL_BASE 0xFE000000
@@ -281,8 +281,7 @@ i2c_status_t i2c_scan(uint8_t* devices, uint32_t max_devices, uint32_t* num_devi
     
     // Scan all possible addresses (0x08 to 0x77)
     for (uint8_t addr = 0x08; addr <= 0x77; addr++) {
-        // Skip reserved addresses
-        if (addr >= 0x00 && addr <= 0x07) continue;
+        // Skip reserved addresses (0x00-0x07 already excluded by loop start)
         if (addr >= 0x78 && addr <= 0x7F) continue;
         
         // Try to write to device

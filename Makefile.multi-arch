@@ -96,7 +96,7 @@ ifeq ($(ARCH),aarch64)
 else ifeq ($(ARCH),arm)
     CFLAGS += -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard
 else ifeq ($(ARCH),x86_64)
-    CFLAGS += -m64 -mcmodel=kernel -mno-red-zone -mno-mmx -mno-sse -mno-sse2
+    CFLAGS += -m64 -mcmodel=kernel -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -fno-pic
 else ifeq ($(ARCH),riscv64)
     CFLAGS += -march=rv64imac -mabi=lp64
 endif
@@ -123,7 +123,8 @@ endif
 
 # Source files
 BOOT_SOURCES = $(wildcard boot/*.S)
-KERNEL_SOURCES = $(wildcard kernel/*.c) $(wildcard kernel/*/*.c)
+KERNEL_SOURCES_ALL = $(wildcard kernel/*.c) $(wildcard kernel/*/*.c)
+KERNEL_SOURCES = $(if $(filter ON,$(ENABLE_AI)),$(filter-out $(wildcard kernel/ai/*.c),$(KERNEL_SOURCES_ALL)),$(KERNEL_SOURCES_ALL))
 DRIVER_SOURCES = $(wildcard drivers/*.c) $(wildcard drivers/*/*.c)
 AI_SOURCES = $(if $(filter ON,$(ENABLE_AI)),$(wildcard kernel/ai/*.c),)
 

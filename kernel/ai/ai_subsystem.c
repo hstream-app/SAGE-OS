@@ -1,17 +1,17 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
-#include "ai/ai_subsystem.h"
-#include "ai_hat/ai_hat.h"
-#include "memory.h"
-#include "uart.h"
-#include <string.h>
-#include <stdio.h>
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
+#include "ai_subsystem.h"
+#include "../../drivers/ai_hat/ai_hat.h"
+#include "../memory.h"
+#include "../../drivers/uart.h"
+#include <stdbool.h>
+#include "../stdio.h"
 
 // Maximum number of models that can be loaded
 #define MAX_MODELS 8

@@ -1,11 +1,11 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Licensing:
 // -----------
 //                                 
@@ -45,19 +45,19 @@
 //
 // Alternatively, commercial use with extended rights is available — contact the author for commercial licensing.
 //
-// ─────────────────────────────────────────────────────────────────────────────
-// Contributor Guidelines:
-// ------------------------
-// Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
-// All contributors must certify that they have the right to submit the code and agree to
-// release it under the above license terms.
-//
-// Contributions must:
-//   - Be original or appropriately attributed
-//   - Include clear documentation and test cases where applicable
-//   - Respect the coding and security guidelines defined in CONTRIBUTING.md
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Contributor Guidelines:
+ * ------------------------
+ * Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
+ * All contributors must certify that they have the right to submit the code and agree to
+ * release it under the above license terms.
+ *
+ * Contributions must:
+ *   - Be original or appropriately attributed
+ *   - Include clear documentation and test cases where applicable
+ *   - Respect the coding and security guidelines defined in CONTRIBUTING.md
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Terms of Use and Disclaimer:
 // -----------------------------
 // This software is provided "as is", without any express or implied warranty.
@@ -67,57 +67,3 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────
-#include <stdint.h>
-#include <stddef.h>
-
-// External functions
-extern void kernel_main(void);
-
-// Rust FFI functions
-extern int rust_init(void);
-
-// Hardware initialization
-extern void uart_init(void);
-extern void timer_init(void);
-extern void interrupt_init(void);
-extern void mmu_init(void);
-
-// AI and crypto initialization
-#ifdef ENABLE_AI
-extern int tflite_init(void);
-#endif
-
-#ifdef ENABLE_CRYPTO
-extern int crypto_init(void);
-#endif
-
-// Entry point
-void _start(void) {
-    // Initialize hardware
-    uart_init();
-    timer_init();
-    interrupt_init();
-    mmu_init();
-    
-    // Initialize optional subsystems
-#ifdef ENABLE_CRYPTO
-    crypto_init();
-#endif
-
-#ifdef ENABLE_AI
-    tflite_init();
-#endif
-    
-    // Initialize Rust
-    rust_init();
-    
-    // Call the Rust kernel main function
-    kernel_main();
-    
-    // We should never reach here
-    while (1) {
-        // Halt the CPU
-        __asm__ volatile("wfe");
-    }
-}
