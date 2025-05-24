@@ -30,21 +30,28 @@ jobs:
         id: check-headers
         continue-on-error: true
         run: |
-          python add_license_headers.py --check-only || true
-          if [ $? -ne 0 ]; then
-            echo "Missing license headers detected"
-            echo "missing_headers=true" >> $GITHUB_OUTPUT
-          else
+          if python add_license_headers.py --check-only; then
             echo "All files have license headers"
             echo "missing_headers=false" >> $GITHUB_OUTPUT
+          else
+            echo "Missing license headers detected"
+            echo "missing_headers=true" >> $GITHUB_OUTPUT
           fi
       
       - name: Add license headers if missing
         if: steps.check-headers.outputs.missing_headers == 'true'
         run: |
           python add_license_headers.py
-          git config --local user.email "github-actions@github.com"
-          git config --local user.name "GitHub Actions"
-          git add .
-          git commit -m "Add missing license headers [automated]"
-          git push
+          
+          # Configure git
+          git config --global user.name "SAGE OS Bot"
+          git config --global user.email "sage-os-bot@example.com"
+          
+          # Check if there are changes to commit
+          if [[ -n $(git status -s) ]]; then
+            git add .
+            git commit -m "Add missing license headers [automated]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
