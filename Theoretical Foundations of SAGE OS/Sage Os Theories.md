@@ -1,3 +1,12 @@
+<!--
+─────────────────────────────────────────────────────────────────────────────
+SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+
+This file is part of the SAGE OS Project.
+─────────────────────────────────────────────────────────────────────────────
+-->
 # Theoretical Foundations of SAGE OS
 
 This directory contains individual markdown files for each theoretical vision or concept behind the development of **SAGE OS** — a self-evolving, AI-integrated operating system designed for deep architectural innovation.
