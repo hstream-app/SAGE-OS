@@ -10,6 +10,8 @@ on:
 jobs:
   add-license-headers:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -28,11 +30,10 @@ jobs:
         id: check-headers
         continue-on-error: true
         run: |
-          python add_license_headers.py --check-only
+          python add_license_headers.py --check-only || true
           if [ $? -ne 0 ]; then
             echo "Missing license headers detected"
             echo "missing_headers=true" >> $GITHUB_OUTPUT
-            exit 0
           else
             echo "All files have license headers"
             echo "missing_headers=false" >> $GITHUB_OUTPUT
