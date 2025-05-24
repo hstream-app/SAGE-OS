@@ -32,8 +32,11 @@ jobs:
             exit 1
           fi
           
+          # Create build directory and copy artifacts
           mkdir -p build/aarch64
-          cp kernel.elf kernel8.img build/aarch64/
+          cp kernel.elf build/aarch64/
+          cp kernel8.img build/aarch64/kernel.img
+          cp kernel8.img build/aarch64/
           
           # Build for x86_64
           echo "Building for x86_64..."
@@ -41,13 +44,15 @@ jobs:
           make ARCH=x86_64
           
           # Check if build artifacts were created
-          if [ ! -f "kernel.elf" ]; then
+          if [ ! -f "kernel.elf" ] || [ ! -f "kernel8.img" ]; then
             echo "Error: Build failed to produce kernel artifacts for x86_64"
             exit 1
           fi
           
+          # Create build directory and copy artifacts
           mkdir -p build/x86_64
           cp kernel.elf build/x86_64/
+          cp kernel8.img build/x86_64/kernel.img
           
           # Build for riscv64
           echo "Building for riscv64..."
@@ -55,35 +60,41 @@ jobs:
           make ARCH=riscv64
           
           # Check if build artifacts were created
-          if [ ! -f "kernel.elf" ]; then
+          if [ ! -f "kernel.elf" ] || [ ! -f "kernel8.img" ]; then
             echo "Error: Build failed to produce kernel artifacts for riscv64"
             exit 1
           fi
           
+          # Create build directory and copy artifacts
           mkdir -p build/riscv64
           cp kernel.elf build/riscv64/
+          cp kernel8.img build/riscv64/kernel.img
           
           echo "✅ Build successful for all architectures"
+          
+          # List build artifacts for debugging
+          echo "Build artifacts:"
+          find build -type f | sort
       
       - name: Test with QEMU
         run: |
           # Make the test script executable
           chmod +x scripts/test_emulated.sh
           
+          # List build artifacts for debugging
+          echo "Build artifacts before testing:"
+          find build -type f | sort
+          
           # Test aarch64 build
           echo "Testing aarch64 build with QEMU..."
-          cp build/aarch64/kernel.elf kernel.elf
-          cp build/aarch64/kernel8.img kernel8.img
           timeout 10s scripts/test_emulated.sh aarch64 || true
           
           # Test x86_64 build
           echo "Testing x86_64 build with QEMU..."
-          cp build/x86_64/kernel.elf kernel.elf
           timeout 10s scripts/test_emulated.sh x86_64 || true
           
           # Test riscv64 build
           echo "Testing riscv64 build with QEMU..."
-          cp build/riscv64/kernel.elf kernel.elf
           timeout 10s scripts/test_emulated.sh riscv64 || true
           
           echo "QEMU tests completed"
