@@ -42,24 +42,36 @@ if [ -z "$ARCH" ]; then
     exit 1
 fi
 
+# List available build artifacts
+echo "Available build artifacts:"
+find build/$ARCH -type f | sort
+
 # Check if kernel image exists
-if [ ! -f "build/$ARCH/kernel.img" ]; then
-    echo "Error: Kernel image not found at build/$ARCH/kernel.img"
+if [ -f "build/$ARCH/kernel.img" ]; then
+    KERNEL_IMG="build/$ARCH/kernel.img"
+elif [ -f "build/$ARCH/kernel8.img" ]; then
+    KERNEL_IMG="build/$ARCH/kernel8.img"
+elif [ -f "build/$ARCH/kernel.elf" ]; then
+    KERNEL_IMG="build/$ARCH/kernel.elf"
+else
+    echo "Error: No kernel image found in build/$ARCH/"
     exit 1
 fi
+
+echo "Using kernel image: $KERNEL_IMG"
 
 echo "Testing SAGE OS on $ARCH architecture..."
 
 # Set up QEMU parameters based on architecture
 case $ARCH in
     x86_64)
-        QEMU_CMD="qemu-system-x86_64 -kernel build/$ARCH/kernel.img -nographic -no-reboot"
+        QEMU_CMD="qemu-system-x86_64 -kernel $KERNEL_IMG -nographic -no-reboot"
         ;;
     arm64|aarch64)
-        QEMU_CMD="qemu-system-aarch64 -machine virt -cpu cortex-a57 -kernel build/$ARCH/kernel.img -nographic -no-reboot"
+        QEMU_CMD="qemu-system-aarch64 -machine virt -cpu cortex-a57 -kernel $KERNEL_IMG -nographic -no-reboot"
         ;;
     riscv64)
-        QEMU_CMD="qemu-system-riscv64 -machine virt -kernel build/$ARCH/kernel.img -nographic -no-reboot"
+        QEMU_CMD="qemu-system-riscv64 -machine virt -kernel $KERNEL_IMG -nographic -no-reboot"
         ;;
     *)
         echo "Unsupported architecture: $ARCH"
