@@ -27,6 +27,7 @@ This is an experiment at the intersection of **kernel engineering**, **embedded 
 - **Shell Interface**: Interactive command-line interface
 - **Hardware Abstraction**: Support for Raspberry Pi 3, 4, and 5
 - **Device Drivers**: UART, GPIO, I2C, SPI, and AI HAT+ drivers
+- **Multi-Architecture Support**: x86_64, aarch64, riscv64, arm
 
 ## 🧠 AI & Machine Learning Integration
 
@@ -57,6 +58,16 @@ The AI HAT+ provides hardware acceleration for neural networks with:
 
 ## 📦 Project Structure
 
+<details>
+  <summary>📦 Folder Structure</summary>
+  
+- `boot/` - Architecture-specific boot code
+- `kernel/` - Core kernel functionality
+- `drivers/` - Hardware drivers
+- `scripts/` - Utility scripts for building and testing
+
+</details>
+
 ```
 SAGE-OS/
 ├── boot/                  # Boot code
@@ -84,7 +95,12 @@ SAGE-OS/
 
 ## 🚀 Getting Started
 
+<details>
+  <summary>🚀 Building and Running SAGE OS</summary>
+
 ### Prerequisites
+
+To build and run SAGE OS, you need the following tools:
 
 - Raspberry Pi 3, 4, or 5
 - SD card
@@ -93,21 +109,48 @@ SAGE-OS/
 - Rust toolchain (for core components)
 - Optional: AI HAT+ for neural processing acceleration
 
-### Building
+- GCC cross-compilers for your target architectures:
+  - `x86_64-linux-gnu-gcc` for x86_64
+  - `aarch64-linux-gnu-gcc` for ARM64/AArch64
+  - `riscv64-linux-gnu-gcc` for RISC-V 64-bit
 
-See [BUILD.md](BUILD.md) for detailed build instructions.
+- QEMU for emulation:
+  - `qemu-system-x86_64` for x86_64
+  - `qemu-system-aarch64` for ARM64/AArch64
+  - `qemu-system-riscv64` for RISC-V 64-bit
 
-Quick start:
+### Installing Prerequisites
+
+On Debian/Ubuntu:
 
 ```bash
-# Install dependencies
-sudo apt-get install gcc-aarch64-linux-gnu cmake
+# Install cross-compilers
+sudo apt-get install gcc-x86-64-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
+
+# Install QEMU
+sudo apt-get install qemu-system-x86 qemu-system-arm qemu-system-misc
+
+# Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustup target add aarch64-unknown-none
+```
 
-# Clone the repository
-git clone https://github.com/AshishYesale7/SAGE-OS.git
-cd SAGE-OS
+### Building SAGE OS
+
+To build SAGE OS for a specific architecture:
+
+```bash
+# Clean previous build artifacts
+make clean
+
+# Build for x86_64
+make ARCH=x86_64
+
+# Build for ARM64/AArch64 (default)
+make ARCH=aarch64
+
+# Build for RISC-V 64-bit
+make ARCH=riscv64
 
 # Build for Raspberry Pi 4
 make
@@ -119,8 +162,37 @@ make rpi5
 make rpi5_ai
 ```
 
-### Running
+The build process creates:
+- Object files for each source file
+- `kernel.elf` - The linked ELF executable
+- `kernel8.img` - The raw binary image
 
+### Running SAGE OS
+
+#### Using QEMU
+
+You can run SAGE OS in QEMU using the provided script:
+
+```bash
+# Run on x86_64
+./scripts/test_emulated.sh x86_64
+
+# Run on ARM64/AArch64
+./scripts/test_emulated.sh aarch64
+
+# Run on RISC-V 64-bit
+./scripts/test_emulated.sh riscv64
+
+# For Raspberry Pi 3/4
+./run_qemu.sh
+
+# For Raspberry Pi 5
+./run_qemu.sh -p rpi5
+```
+
+#### Running on Real Hardware
+
+For Raspberry Pi (ARM64):
 1. Copy `kernel8.img` and the appropriate config file to an SD card:
    - For Raspberry Pi 3/4: Use `config.txt`
    - For Raspberry Pi 5: Use `config_rpi5.txt` (rename to `config.txt` on the SD card)
@@ -128,17 +200,43 @@ make rpi5_ai
 3. Connect a serial console
 4. Power on the Raspberry Pi
 
-### Testing with QEMU
+### Development
 
-You can test SAGE OS without physical hardware using QEMU:
+#### Adding New Features
+
+1. Add your source files to the appropriate directory
+2. Update the Makefile if necessary
+3. Build and test using the commands above
+
+#### License Compliance
+
+All source files must include the BSD 3-Clause License header. You can check for compliance using:
 
 ```bash
-# For Raspberry Pi 3/4
-./run_qemu.sh
-
-# For Raspberry Pi 5
-./run_qemu.sh -p rpi5
+./license-checker.py
 ```
+
+If you need to add license headers to new files:
+
+```bash
+./add_license_headers.py
+```
+
+### Troubleshooting
+
+#### Build Errors
+
+- **Missing compiler**: Make sure you have installed the appropriate cross-compiler for your target architecture
+- **Linker errors**: Check that all required object files are being included in the link step
+
+#### Runtime Errors
+
+- **Kernel doesn't boot**: Verify that the boot code for your architecture is correctly implemented
+- **QEMU crashes**: Make sure you're using the correct QEMU parameters for your architecture
+
+</details>
+
+See [BUILD.md](BUILD.md) for detailed build instructions.
 
 ### Shell Commands
 
@@ -175,6 +273,7 @@ By contributing, you agree to the above terms.
 - [x] UART driver for console I/O
 - [x] Raspberry Pi 5 support
 - [x] AI HAT+ driver for neural processing
+- [x] Multi-architecture build system
 - [ ] Self-tuning task scheduler
 - [ ] Support for minimal file system
 - [ ] Ability to evolve through version-aware updates

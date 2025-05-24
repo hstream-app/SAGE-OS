@@ -21,18 +21,20 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 # Include paths
 INCLUDES=-I. -Ikernel -Idrivers
 
-# Architecture-specific flags
+# Base CFLAGS
+CFLAGS=-nostdlib -nostartfiles -ffreestanding -O2 -Wall -Wextra $(INCLUDES)
+
+# Architecture-specific flags and defines
 ifeq ($(ARCH),x86_64)
-    ARCH_FLAGS=-m64
+    CFLAGS += -m64 -D__x86_64__
 else ifeq ($(ARCH),arm64)
-    ARCH_FLAGS=
+    CFLAGS += -D__aarch64__
 else ifeq ($(ARCH),aarch64)
-    ARCH_FLAGS=
+    CFLAGS += -D__aarch64__
 else ifeq ($(ARCH),riscv64)
-    ARCH_FLAGS=
+    CFLAGS += -D__riscv -D__riscv_xlen=64
 endif
 
-CFLAGS=-nostdlib -nostartfiles -ffreestanding -O2 -Wall -Wextra $(ARCH_FLAGS) $(INCLUDES)
 LDFLAGS=-T linker.ld
 
 # Create build directory for architecture
@@ -88,3 +90,5 @@ info:
 	@echo "LDFLAGS: $(LDFLAGS)"
 	@echo "Source files: $(words $(SOURCES))"
 	@echo "Object files: $(words $(OBJECTS))"
+
+.PHONY: all clean all-arch info
