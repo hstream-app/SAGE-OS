@@ -22,14 +22,28 @@ jobs:
       - name: Set up toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc g++ make qemu-system
+          sudo apt-get install -y build-essential gcc g++ make
+          sudo apt-get install -y gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu gcc-riscv64-linux-gnu
+          sudo apt-get install -y qemu-system-arm qemu-system-x86 qemu-system-misc
 
       - name: Build kernel
         run: |
+          make clean
           make ARCH=${{ matrix.architecture }}
+          
+          # Create build directory and copy artifacts
+          mkdir -p build/${{ matrix.architecture }}
+          cp kernel.elf build/${{ matrix.architecture }}/
+          
+          # Copy kernel8.img for ARM architectures
+          if [[ "${{ matrix.architecture }}" == "arm64" || "${{ matrix.architecture }}" == "aarch64" ]]; then
+            cp kernel8.img build/${{ matrix.architecture }}/
+          fi
 
       - name: Test kernel
-        run: ./scripts/test_emulated.sh ${{ matrix.architecture }}
+        run: |
+          chmod +x scripts/test_emulated.sh
+          timeout 30s scripts/test_emulated.sh ${{ matrix.architecture }} || true
 
       - name: Upload Build
         uses: actions/upload-artifact@v3

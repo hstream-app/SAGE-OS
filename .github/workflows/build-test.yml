@@ -16,24 +16,74 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi qemu-system-arm
+          sudo apt-get install -y gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu gcc-riscv64-linux-gnu
+          sudo apt-get install -y qemu-system-arm qemu-system-x86 qemu-system-misc
       
-      - name: Build kernel
+      - name: Build kernel for all architectures
         run: |
+          # Build for aarch64 (default)
+          echo "Building for aarch64..."
           make clean
-          make
+          make ARCH=aarch64
           
           # Check if build artifacts were created
           if [ ! -f "kernel.elf" ] || [ ! -f "kernel8.img" ]; then
-            echo "Error: Build failed to produce kernel artifacts"
+            echo "Error: Build failed to produce kernel artifacts for aarch64"
             exit 1
           fi
           
-          echo "✅ Build successful"
+          mkdir -p build/aarch64
+          cp kernel.elf kernel8.img build/aarch64/
+          
+          # Build for x86_64
+          echo "Building for x86_64..."
+          make clean
+          make ARCH=x86_64
+          
+          # Check if build artifacts were created
+          if [ ! -f "kernel.elf" ]; then
+            echo "Error: Build failed to produce kernel artifacts for x86_64"
+            exit 1
+          fi
+          
+          mkdir -p build/x86_64
+          cp kernel.elf build/x86_64/
+          
+          # Build for riscv64
+          echo "Building for riscv64..."
+          make clean
+          make ARCH=riscv64
+          
+          # Check if build artifacts were created
+          if [ ! -f "kernel.elf" ]; then
+            echo "Error: Build failed to produce kernel artifacts for riscv64"
+            exit 1
+          fi
+          
+          mkdir -p build/riscv64
+          cp kernel.elf build/riscv64/
+          
+          echo "✅ Build successful for all architectures"
       
-      - name: Test with QEMU (if possible)
+      - name: Test with QEMU
         run: |
-          # Try to run QEMU for a short time to see if it boots
-          # This is a basic test to see if the kernel can be loaded by QEMU
-          timeout 10s ./run_qemu.sh || true
-          echo "QEMU test completed"
+          # Make the test script executable
+          chmod +x scripts/test_emulated.sh
+          
+          # Test aarch64 build
+          echo "Testing aarch64 build with QEMU..."
+          cp build/aarch64/kernel.elf kernel.elf
+          cp build/aarch64/kernel8.img kernel8.img
+          timeout 10s scripts/test_emulated.sh aarch64 || true
+          
+          # Test x86_64 build
+          echo "Testing x86_64 build with QEMU..."
+          cp build/x86_64/kernel.elf kernel.elf
+          timeout 10s scripts/test_emulated.sh x86_64 || true
+          
+          # Test riscv64 build
+          echo "Testing riscv64 build with QEMU..."
+          cp build/riscv64/kernel.elf kernel.elf
+          timeout 10s scripts/test_emulated.sh riscv64 || true
+          
+          echo "QEMU tests completed"
