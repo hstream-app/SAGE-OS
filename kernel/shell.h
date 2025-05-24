@@ -1,11 +1,11 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Licensing:
 // -----------
 //                                 
@@ -45,19 +45,19 @@
 //
 // Alternatively, commercial use with extended rights is available — contact the author for commercial licensing.
 //
-// ─────────────────────────────────────────────────────────────────────────────
-// Contributor Guidelines:
-// ------------------------
-// Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
-// All contributors must certify that they have the right to submit the code and agree to
-// release it under the above license terms.
-//
-// Contributions must:
-//   - Be original or appropriately attributed
-//   - Include clear documentation and test cases where applicable
-//   - Respect the coding and security guidelines defined in CONTRIBUTING.md
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Contributor Guidelines:
+ * ------------------------
+ * Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
+ * All contributors must certify that they have the right to submit the code and agree to
+ * release it under the above license terms.
+ *
+ * Contributions must:
+ *   - Be original or appropriately attributed
+ *   - Include clear documentation and test cases where applicable
+ *   - Respect the coding and security guidelines defined in CONTRIBUTING.md
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Terms of Use and Disclaimer:
 // -----------------------------
 // This software is provided "as is", without any express or implied warranty.
@@ -67,20 +67,13 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────
 
 #ifndef SHELL_H
 #define SHELL_H
 
-#include "types.h"
-
-// Initialize the shell
+// Function declarations
 void shell_init();
-
-// Run the shell (main loop)
 void shell_run();
-
-// Process a command
 void shell_process_command(const char* command);
 
 #endif // SHELL_H

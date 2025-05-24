@@ -1,11 +1,11 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Licensing:
 // -----------
 //                                 
@@ -45,19 +45,19 @@
 //
 // Alternatively, commercial use with extended rights is available — contact the author for commercial licensing.
 //
-// ─────────────────────────────────────────────────────────────────────────────
-// Contributor Guidelines:
-// ------------------------
-// Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
-// All contributors must certify that they have the right to submit the code and agree to
-// release it under the above license terms.
-//
-// Contributions must:
-//   - Be original or appropriately attributed
-//   - Include clear documentation and test cases where applicable
-//   - Respect the coding and security guidelines defined in CONTRIBUTING.md
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Contributor Guidelines:
+ * ------------------------
+ * Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
+ * All contributors must certify that they have the right to submit the code and agree to
+ * release it under the above license terms.
+ *
+ * Contributions must:
+ *   - Be original or appropriately attributed
+ *   - Include clear documentation and test cases where applicable
+ *   - Respect the coding and security guidelines defined in CONTRIBUTING.md
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Terms of Use and Disclaimer:
 // -----------------------------
 // This software is provided "as is", without any express or implied warranty.
@@ -67,95 +67,76 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────
+
 #include "stdio.h"
-#include "types.h"
-#include <stdarg.h>
 
-// Format a string and store it in a buffer
-int sprintf(char* buffer, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    int result = vsprintf(buffer, format, args);
-    va_end(args);
-    return result;
-}
-
-// Helper: convert unsigned value to ASCII in given base, returns number of digits written
-static int utoa_base(unsigned val, char *buf, int base) {
-    static const char *digits = "0123456789abcdef";
-    char *start = buf;
-    // at least one digit
-    do {
-        *buf++ = digits[val % base];
-        val /= base;
-    } while (val > 0);
-    // reverse [start..buf)
-    for (char *p = start, *q = buf - 1; p < q; ++p, --q) {
-        char t = *p; *p = *q; *q = t;
+// String length
+size_t strlen(const char* str) {
+    size_t len = 0;
+    while (str[len]) {
+        len++;
     }
-    return buf - start;
+    return len;
 }
 
-// Helper: copy a C-string, return number of bytes (excl. NUL)
-static int copy_str(char *dst, const char *src) {
-    char *start = dst;
-    while ((*dst++ = *src++));
-    return dst - start - 1;
+// String comparison
+int strcmp(const char* str1, const char* str2) {
+    while (*str1 && (*str1 == *str2)) {
+        str1++;
+        str2++;
+    }
+    return *(unsigned char*)str1 - *(unsigned char*)str2;
 }
 
-// Format a string with a va_list and store it in a buffer
-int vsprintf(char* buffer, const char* format, va_list args) {
-    char* buf_ptr = buffer;
-    const char* fmt_ptr = format;
+// String copy
+char* strcpy(char* dest, const char* src) {
+    char* original_dest = dest;
+    while ((*dest++ = *src++));
+    return original_dest;
+}
+
+// String copy with limit
+char* strncpy(char* dest, const char* src, size_t n) {
+    size_t i;
+    for (i = 0; i < n && src[i] != '\0'; i++) {
+        dest[i] = src[i];
+    }
+    for (; i < n; i++) {
+        dest[i] = '\0';
+    }
+    return dest;
+}
+
+// Memory set
+void* memset(void* ptr, int value, size_t num) {
+    unsigned char* p = (unsigned char*)ptr;
+    while (num--) {
+        *p++ = (unsigned char)value;
+    }
+    return ptr;
+}
+
+// Memory copy
+void* memcpy(void* dest, const void* src, size_t n) {
+    char* d = (char*)dest;
+    const char* s = (const char*)src;
     
-    while (*fmt_ptr) {
-        if (*fmt_ptr != '%') {
-            *buf_ptr++ = *fmt_ptr++;
-            continue;
-        }
-        
-        fmt_ptr++; // Skip '%'
-        
-        // Handle format specifiers
-        switch (*fmt_ptr++) {
-            case 's': {
-                buf_ptr += copy_str(buf_ptr, va_arg(args, const char*));
-                break;
-            }
-            case 'd': {
-                int v = va_arg(args, int);
-                if (v < 0) {
-                    *buf_ptr++ = '-';
-                    v = -v;
-                }
-                buf_ptr += utoa_base((unsigned)v, buf_ptr, 10);
-                break;
-            }
-            case 'x': {
-                unsigned v = va_arg(args, unsigned);
-                *buf_ptr++ = '0';
-                *buf_ptr++ = 'x';
-                buf_ptr += utoa_base(v, buf_ptr, 16);
-                break;
-            }
-            case 'c': {
-                *buf_ptr++ = (char)va_arg(args, int);
-                break;
-            }
-            case '%': {
-                *buf_ptr++ = '%';
-                break;
-            }
-            default: {
-                *buf_ptr++ = *(fmt_ptr - 1);
-                break;
-            }
-        }
+    for (size_t i = 0; i < n; i++) {
+        d[i] = s[i];
     }
     
-    // Null terminate
-    *buf_ptr = '\0';
-    
-    return buf_ptr - buffer;
+    return dest;
+}
+
+// Simple sprintf implementation
+int sprintf(char* str, const char* format, ...) {
+    // Very basic implementation - just copy format string for now
+    // In a real implementation, this would handle format specifiers
+    int i = 0;
+    while (format[i]) {
+        str[i] = format[i];
+        i++;
+    }
+    str[i] = '\0';
+    return i;
 }

@@ -46,6 +46,40 @@ hang_aarch64:
     wfe
     b       hang_aarch64
 
+#elif defined(__arm__)
+    // ARM (32-bit) specific code
+    // Check processor ID, stop all but core 0
+    mrc     p15, 0, r1, c0, c0, 5
+    and     r1, r1, #3
+    cmp     r1, #0
+    bne     1f
+    b       2f
+    // CPU ID > 0, stop
+1:  wfe
+    b       1b
+2:  // CPU ID == 0
+
+    // Set stack pointer
+    ldr     r1, =stack_top
+    mov     sp, r1
+
+    // Clear BSS
+    ldr     r1, =__bss_start
+    ldr     r2, =__bss_end
+    mov     r3, #0
+3:  cmp     r1, r2
+    bge     4f
+    str     r3, [r1], #4
+    b       3b
+    
+4:  // Jump to C code
+    bl      kernel_main
+    
+    // If kernel_main returns, halt the CPU
+hang_arm:
+    wfe
+    b       hang_arm
+
 #elif defined(__x86_64__)
     // x86_64 specific code
     // Set up stack

@@ -1,13 +1,14 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 #include "spi.h"
 #include "uart.h"
+#include <stdbool.h>
 
 // Raspberry Pi 5 SPI registers
 #define RPI5_PERIPHERAL_BASE 0xFE000000

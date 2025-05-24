@@ -1,11 +1,11 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Licensing:
 // -----------
 //                                 
@@ -45,19 +45,19 @@
 //
 // Alternatively, commercial use with extended rights is available — contact the author for commercial licensing.
 //
-// ─────────────────────────────────────────────────────────────────────────────
-// Contributor Guidelines:
-// ------------------------
-// Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
-// All contributors must certify that they have the right to submit the code and agree to
-// release it under the above license terms.
-//
-// Contributions must:
-//   - Be original or appropriately attributed
-//   - Include clear documentation and test cases where applicable
-//   - Respect the coding and security guidelines defined in CONTRIBUTING.md
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Contributor Guidelines:
+ * ------------------------
+ * Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
+ * All contributors must certify that they have the right to submit the code and agree to
+ * release it under the above license terms.
+ *
+ * Contributions must:
+ *   - Be original or appropriately attributed
+ *   - Include clear documentation and test cases where applicable
+ *   - Respect the coding and security guidelines defined in CONTRIBUTING.md
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Terms of Use and Disclaimer:
 // -----------------------------
 // This software is provided "as is", without any express or implied warranty.
@@ -67,40 +67,14 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────
 
 #ifndef TYPES_H
 #define TYPES_H
 
-// Use standard types from compiler
-#include <stddef.h>
 #include <stdint.h>
+#include <stddef.h>
 
-// Boolean type if not defined
-#ifndef __cplusplus
-#ifndef bool
-typedef enum {
-    false = 0,
-    true = 1
-} bool;
-#endif
-#endif
-
-// NULL definition if not defined
-#ifndef NULL
-#define NULL ((void*)0)
-#endif
-
-// Memory manipulation functions
-void* memcpy(void* dest, const void* src, size_t n);
-void* memset(void* s, int c, size_t n);
-int memcmp(const void* s1, const void* s2, size_t n);
-
-// String manipulation functions
-size_t strlen(const char* s);
-char* strcpy(char* dest, const char* src);
-char* strncpy(char* dest, const char* src, size_t n);
-int strcmp(const char* s1, const char* s2);
-int strncmp(const char* s1, const char* s2, size_t n);
+// Basic type definitions are provided by stdint.h
+// No need to redefine them
 
 #endif // TYPES_H

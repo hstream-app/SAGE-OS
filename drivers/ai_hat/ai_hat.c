@@ -1,16 +1,17 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 #include "ai_hat/ai_hat.h"
 #include "uart.h"
 #include "i2c.h"
 #include "spi.h"
-#include <string.h>
+#include "../../kernel/stdio.h"
+#include <stdbool.h>
 
 // AI HAT+ I2C address
 #define AI_HAT_I2C_ADDR     0x42
@@ -39,7 +40,7 @@ static ai_hat_model_t loaded_models[8]; // Support up to 8 models
 static uint32_t num_loaded_models = 0;
 
 // Delay function - simple busy wait
-static void delay(int32_t count) {
+static void __attribute__((unused)) delay(int32_t count) {
     while (count--) {
         asm volatile("nop");
     }
@@ -153,7 +154,7 @@ static ai_hat_status_t read_data(uint8_t reg, uint8_t* data, uint32_t len) {
 }
 
 // Transfer data to/from AI HAT+ via SPI
-static ai_hat_status_t transfer_data(uint8_t* tx_data, uint8_t* rx_data, uint32_t len) {
+static ai_hat_status_t __attribute__((unused)) transfer_data(uint8_t* tx_data, uint8_t* rx_data, uint32_t len) {
     spi_status_t status;
     
     // Transfer data via SPI

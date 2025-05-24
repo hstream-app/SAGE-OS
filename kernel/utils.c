@@ -1,11 +1,11 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
-// SPDX-License-Identifier: BSD-3-Clause OR Proprietary
-// SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
-// 
-// This file is part of the SAGE OS Project.
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+ * SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+ * SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+ * 
+ * This file is part of the SAGE OS Project.
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Licensing:
 // -----------
 //                                 
@@ -45,19 +45,19 @@
 //
 // Alternatively, commercial use with extended rights is available — contact the author for commercial licensing.
 //
-// ─────────────────────────────────────────────────────────────────────────────
-// Contributor Guidelines:
-// ------------------------
-// Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
-// All contributors must certify that they have the right to submit the code and agree to
-// release it under the above license terms.
-//
-// Contributions must:
-//   - Be original or appropriately attributed
-//   - Include clear documentation and test cases where applicable
-//   - Respect the coding and security guidelines defined in CONTRIBUTING.md
-//
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Contributor Guidelines:
+ * ------------------------
+ * Contributions are welcome under the terms of the Developer Certificate of Origin (DCO).
+ * All contributors must certify that they have the right to submit the code and agree to
+ * release it under the above license terms.
+ *
+ * Contributions must:
+ *   - Be original or appropriately attributed
+ *   - Include clear documentation and test cases where applicable
+ *   - Respect the coding and security guidelines defined in CONTRIBUTING.md
+ *
+ * ───────────────────────────────────────────────────────────────────────────── */
 // Terms of Use and Disclaimer:
 // -----------------------------
 // This software is provided "as is", without any express or implied warranty.
@@ -67,133 +67,41 @@
 // Use of this software in critical systems (e.g., medical, nuclear, safety)
 // is entirely at your own risk unless specifically licensed for such purposes.
 //
-// ─────────────────────────────────────────────────────────────────────────────
 
-#include "types.h"
-#include <stddef.h>
+#include "utils.h"
 
-// Memory manipulation functions
-
-void* memcpy(void* dest, const void* src, size_t n) {
-    uint8_t* d = (uint8_t*)dest;
-    const uint8_t* s = (const uint8_t*)src;
-    
-    while (n--) {
-        *d++ = *s++;
-    }
-    
-    return dest;
-}
-
-void* memset(void* s, int c, size_t n) {
-    uint8_t* p = (uint8_t*)s;
-    
-    while (n--) {
-        *p++ = (uint8_t)c;
-    }
-    
-    return s;
-}
-
-int memcmp(const void* s1, const void* s2, size_t n) {
-    const uint8_t* p1 = (const uint8_t*)s1;
-    const uint8_t* p2 = (const uint8_t*)s2;
-    
-    while (n--) {
-        if (*p1 != *p2) {
-            return *p1 - *p2;
-        }
-        p1++;
-        p2++;
-    }
-    
-    return 0;
-}
-
-// String manipulation functions
-
-size_t strlen(const char* s) {
-    size_t len = 0;
-    while (*s++) {
-        len++;
-    }
-    return len;
-}
-
-char* strcpy(char* dest, const char* src) {
-    char* d = dest;
-    while ((*d++ = *src++));
-    return dest;
-}
-
-char* strncpy(char* dest, const char* src, size_t n) {
-    char* d = dest;
-    
-    while (n > 0) {
-        if ((*d++ = *src++) == '\0') {
-            // Fill the rest with zeros
-            while (--n > 0) {
-                *d++ = '\0';
-            }
-            break;
-        }
-        n--;
-    }
-    
-    return dest;
-}
-
-int strcmp(const char* s1, const char* s2) {
-    while (*s1 && (*s1 == *s2)) {
-        s1++;
-        s2++;
-    }
-    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
-}
-
-int strncmp(const char* s1, const char* s2, size_t n) {
-    while (n && *s1 && (*s1 == *s2)) {
-        s1++;
-        s2++;
-        n--;
-    }
-    
-    if (n == 0) {
+// Convert unsigned integer to string with given base
+int utoa_base(unsigned int value, char* buffer, int base) {
+    if (base < 2 || base > 36) {
         return 0;
     }
     
-    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
-}
-
-// Convert unsigned integer to string with specified base
-char* utoa_base(unsigned int value, char* str, int base) {
-    const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-    char* ptr = str;
-    char* start = str;
-    unsigned int temp;
+    char temp[32];
+    int i = 0;
     
-    // Check if the base is valid
-    if (base < 2 || base > 36) {
-        *str = '\0';
-        return str;
+    if (value == 0) {
+        buffer[0] = '0';
+        buffer[1] = '\0';
+        return 1;
     }
     
-    // Convert to the specified base
-    do {
-        temp = value;
+    while (value > 0) {
+        int digit = value % base;
+        if (digit < 10) {
+            temp[i] = '0' + digit;
+        } else {
+            temp[i] = 'A' + (digit - 10);
+        }
+        i++;
         value /= base;
-        *ptr++ = digits[temp - value * base];
-    } while (value);
-    
-    // Add null terminator
-    *ptr-- = '\0';
+    }
     
     // Reverse the string
-    while (start < ptr) {
-        char temp = *start;
-        *start++ = *ptr;
-        *ptr-- = temp;
+    int len = i;
+    for (int j = 0; j < len; j++) {
+        buffer[j] = temp[len - 1 - j];
     }
+    buffer[len] = '\0';
     
-    return str;
+    return len;
 }
