@@ -1,3 +1,12 @@
+<!--
+─────────────────────────────────────────────────────────────────────────────
+SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+
+This file is part of the SAGE OS Project.
+─────────────────────────────────────────────────────────────────────────────
+-->
 Stepping into a bold and visionary territory few have dared to explore. Here's how we’ll approach **SAGE OS** in phases, from the foundational kernel to a self-evolving system.
 
 ---

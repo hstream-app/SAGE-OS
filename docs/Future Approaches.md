@@ -1,3 +1,12 @@
+<!--
+─────────────────────────────────────────────────────────────────────────────
+SAGE OS — Copyright (c) 2025 Ashish Vasant Yesale (ashishyesale007@gmail.com)
+SPDX-License-Identifier: BSD-3-Clause OR Proprietary
+SAGE OS is dual-licensed under the BSD 3-Clause License and a Commercial License.
+
+This file is part of the SAGE OS Project.
+─────────────────────────────────────────────────────────────────────────────
+-->
 # Future Approaches for SAGE OS
 
 SAGE OS is envisioned as a long-term research and engineering initiative that explores the boundaries of AI-integrated operating systems. This document outlines the planned and potential future directions that will guide the evolution of SAGE OS beyond its initial proof-of-concept.
