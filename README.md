@@ -3,6 +3,8 @@
 **Self-Aware General Environment**  
 An experimental, bare-metal operating system designed from scratch to learn, adapt, and evolve — starting on Raspberry Pi.
 
+> For detailed usage instructions, see [USAGE_GUIDE.md](./USAGE_GUIDE.md)
+
 ![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)
 
 ## 🔭 Vision 
