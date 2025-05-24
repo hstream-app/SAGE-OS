@@ -1,0 +1,80 @@
+# SAGE OS Documentation - GitHub Pages Configuration
+title: SAGE OS Documentation
+description: Comprehensive documentation for SAGE OS - Self-Aware General-purpose Embedded Operating System
+baseurl: "/SAGE-OS"
+url: "https://hstream-app.github.io"
+
+# Theme
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Navigation
+header_pages:
+  - index.md
+  - architecture/index.md
+  - api/index.md
+  - build/index.md
+  - deployment/index.md
+  - testing/index.md
+  - contributing/index.md
+
+# Markdown settings
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Collections
+collections:
+  architecture:
+    output: true
+    permalink: /:collection/:name/
+  api:
+    output: true
+    permalink: /:collection/:name/
+  build:
+    output: true
+    permalink: /:collection/:name/
+  deployment:
+    output: true
+    permalink: /:collection/:name/
+  testing:
+    output: true
+    permalink: /:collection/:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+      type: "architecture"
+    values:
+      layout: "default"
+  - scope:
+      path: ""
+      type: "api"
+    values:
+      layout: "default"
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
